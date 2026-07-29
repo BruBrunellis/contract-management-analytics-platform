@@ -1,6 +1,6 @@
 """Gera contratos fictícios e o histórico detalhado de seus aditamentos."""
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 import random
 
@@ -251,9 +251,9 @@ if __name__ == "__main__":
     arquivo_empresas = localizar_arquivo_empresas()
     df_empresas = pd.read_csv(arquivo_empresas, dtype={"CNPJ": "string"})
     df_contratos, df_aditamentos = gerar_tabelas_contratos(df_empresas)
-    data_execucao = date.today().strftime("%Y%m%d")
-    arquivo_contratos = RAW_DIR / f"contratos_ficticios_{data_execucao}.csv"
-    arquivo_aditamentos = RAW_DIR / f"aditamentos_{data_execucao}.csv"
+    identificador_lote = datetime.now().strftime("%Y%m%d_%H%M%S")
+    arquivo_contratos = RAW_DIR / f"contratos_ficticios_{identificador_lote}.csv"
+    arquivo_aditamentos = RAW_DIR / f"aditamentos_{identificador_lote}.csv"
     df_contratos.to_csv(arquivo_contratos, index=False, encoding="utf-8-sig")
     df_aditamentos.to_csv(arquivo_aditamentos, index=False, encoding="utf-8-sig")
 

@@ -16,10 +16,18 @@ PESOS_MODELOS = (0.75, 0.10, 0.15)
 
 def data_arquivo_versionado(caminho):
     """Extrai a data YYYYMMDD de um arquivo versionado."""
-    correspondencia = re.search(r"_(\d{8})\.csv$", caminho.name)
+    correspondencia = re.search(r"_(\d{8})(?:_\d{6})?\.csv$", caminho.name)
     if not correspondencia:
         raise ValueError(f"Nome de arquivo sem data de versão: {caminho.name}")
     return datetime.strptime(correspondencia.group(1), "%Y%m%d").date()
+
+
+def identificador_arquivo_versionado(caminho):
+    """Extrai o identificador de lote YYYYMMDD ou YYYYMMDD_HHMMSS."""
+    correspondencia = re.search(r"_(\d{8}(?:_\d{6})?)\.csv$", caminho.name)
+    if not correspondencia:
+        raise ValueError(f"Nome de arquivo sem identificador de versão: {caminho.name}")
+    return correspondencia.group(1)
 
 
 def localizar_arquivos_origem():
@@ -30,7 +38,8 @@ def localizar_arquivos_origem():
 
     arquivo_contratos = contratos[-1]
     data_snapshot = data_arquivo_versionado(arquivo_contratos)
-    arquivo_aditamentos = RAW_DIR / f"aditamentos_{data_snapshot:%Y%m%d}.csv"
+    identificador_lote = identificador_arquivo_versionado(arquivo_contratos)
+    arquivo_aditamentos = RAW_DIR / f"aditamentos_{identificador_lote}.csv"
     if not arquivo_aditamentos.exists():
         raise FileNotFoundError(
             f"Não foi encontrado o arquivo de aditamentos correspondente a {arquivo_contratos.name}."
@@ -250,7 +259,8 @@ if __name__ == "__main__":
         data_snapshot,
         data_referencia,
     )
-    arquivo_saida = RAW_DIR / f"spending_ficticio_{data_referencia:%Y%m%d}.csv"
+    identificador_lote = datetime.now().strftime("%Y%m%d_%H%M%S")
+    arquivo_saida = RAW_DIR / f"spending_ficticio_{identificador_lote}.csv"
     df_spending.to_csv(arquivo_saida, index=False, encoding="utf-8-sig")
     print(f"Arquivo de spending gerado: {arquivo_saida}")
     print(f"Data do snapshot de contratos: {data_snapshot:%Y-%m-%d}")
