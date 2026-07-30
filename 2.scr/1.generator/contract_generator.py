@@ -105,10 +105,23 @@ def gerar_aportes(codigo_contrato, inicio_ciclo, fim_ciclo, valor_renovacao, seq
     return aportes, valor_total_aportado, sequencia
 
 
-def gerar_aditamentos(codigo_contrato, valor_original, vigencia_inicio, vigencia_fim, duracao_meses, renovado):
-    """Gera ciclos anuais de renovação e seus aportes eventuais."""
+def obter_avaliacao_risco(df_riscos, cnpj, data_evento):
+    """Busca a avaliação anual disponível para a data de um ciclo contratual."""
+    avaliacoes = df_riscos[df_riscos["CNPJ"].eq(cnpj)].copy()
+    avaliacoes["Data_Avaliacao"] = pd.to_datetime(avaliacoes["Data_Avaliacao"])
+    ano = data_evento.year
+    candidatas = avaliacoes[avaliacoes["Data_Avaliacao"].dt.year.eq(ano)]
+    if candidatas.empty:
+        candidatas = avaliacoes[avaliacoes["Data_Avaliacao"] <= pd.Timestamp(data_evento)]
+    if candidatas.empty:
+        return None
+    return candidatas.sort_values("Data_Avaliacao").iloc[-1]
+
+
+def gerar_aditamentos(codigo_contrato, cnpj, valor_original, vigencia_inicio, vigencia_fim, duracao_meses, renovado, df_riscos, data_referencia):
+    """Gera renovação apenas quando a avaliação de risco anual é aprovada."""
     if not renovado:
-        return [], 0.0, 0.0
+        return [], 0.0, 0.0, False, None, None
 
     qtd_renovacoes = max(1, (duracao_meses - 1) // 12)
     ultimo_valor_anualizado = valor_original
@@ -119,10 +132,15 @@ def gerar_aditamentos(codigo_contrato, valor_original, vigencia_inicio, vigencia
 
     for numero_ciclo in range(1, qtd_renovacoes + 1):
         inicio_ciclo = vigencia_inicio + relativedelta(months=12 * numero_ciclo)
+        if inicio_ciclo > data_referencia:
+            break
         fim_ciclo = min(
             vigencia_inicio + relativedelta(months=12 * (numero_ciclo + 1)) - timedelta(days=1),
             vigencia_fim,
         )
+        avaliacao = obter_avaliacao_risco(df_riscos, cnpj, inicio_ciclo)
+        if avaliacao is None or avaliacao["Resultado_Homologacao"] != "Aprovada":
+            return aditamentos, round(valor_renovado, 2), round(valor_aportado, 2), True, inicio_ciclo, avaliacao
         ultimo_valor_anualizado = round(
             ultimo_valor_anualizado * random.uniform(0.85, 1.15),
             2,
@@ -150,7 +168,7 @@ def gerar_aditamentos(codigo_contrato, valor_original, vigencia_inicio, vigencia
         aditamentos.extend(aportes)
         valor_aportado += valor_ciclo_aportado
 
-    return aditamentos, round(valor_renovado, 2), round(valor_aportado, 2)
+    return aditamentos, round(valor_renovado, 2), round(valor_aportado, 2), False, None, None
 
 
 def calcular_saldo(valor_total, valor_disponivel, vigencia_inicio, vigencia_fim, data_referencia, eh_outlier_consumo):
@@ -174,7 +192,7 @@ def calcular_saldo(valor_total, valor_disponivel, vigencia_inicio, vigencia_fim,
     return round(valor_total - valor_consumido, 2), "Ativo"
 
 
-def gerar_tabelas_contratos(df_empresas, data_referencia=None):
+def gerar_tabelas_contratos(df_empresas, df_riscos, data_referencia=None):
     """Gera tabelas de contratos e de aditamentos detalhados."""
     data_referencia = data_referencia or date.today()
     contratos = []
@@ -185,23 +203,41 @@ def gerar_tabelas_contratos(df_empresas, data_referencia=None):
     for _, empresa in df_empresas.iterrows():
         media_faturamento = empresa[colunas_faturamento].astype(float).mean()
         for _ in range(quantidade_contratos(empresa["Porte_Empresa"], empresa["Hierarquia"])):
-            codigo_contrato = f"CS{codigo_counter:08d}"
-            codigo_counter += 1
             duracao_meses = random.randint(6, 120)
-            inicio_minimo = date(data_referencia.year - 6, 1, 1)
+            inicio_minimo = date(2022, 1, 1)
             inicio_maximo = data_referencia - timedelta(days=26)
             vigencia_inicio = inicio_minimo + timedelta(days=random.randint(0, (inicio_maximo - inicio_minimo).days))
             vigencia_fim = vigencia_inicio + relativedelta(months=duracao_meses) - timedelta(days=1)
+            avaliacao_inicial = obter_avaliacao_risco(df_riscos, empresa["CNPJ"], vigencia_inicio)
+            if avaliacao_inicial is None or avaliacao_inicial["Resultado_Homologacao"] != "Aprovada":
+                continue
+            codigo_contrato = f"CS{codigo_counter:08d}"
+            codigo_counter += 1
             valor_original = round(media_faturamento * random.uniform(0.01, 0.35), 2)
             renovado = duracao_meses >= 24 and random.choice([True, False])
-            aditamentos_contrato, valor_renovado, valor_aportado = gerar_aditamentos(
+            aditamentos_contrato, valor_renovado, valor_aportado, encerrado_por_risco, data_encerramento, avaliacao_encerramento = gerar_aditamentos(
                 codigo_contrato,
+                empresa["CNPJ"],
                 valor_original,
                 vigencia_inicio,
                 vigencia_fim,
                 duracao_meses,
                 renovado,
+                df_riscos,
+                data_referencia,
             )
+            if encerrado_por_risco:
+                vigencia_fim = data_encerramento - timedelta(days=1)
+            avaliacao_atual = obter_avaliacao_risco(df_riscos, empresa["CNPJ"], data_referencia)
+            if (
+                not encerrado_por_risco
+                and vigencia_fim >= data_referencia
+                and (avaliacao_atual is None or avaliacao_atual["Resultado_Homologacao"] != "Aprovada")
+            ):
+                encerrado_por_risco = True
+                data_encerramento = data_referencia
+                avaliacao_encerramento = avaliacao_atual
+                vigencia_fim = data_encerramento - timedelta(days=1)
             aditamentos.extend(aditamentos_contrato)
             valor_total = round(valor_original + valor_renovado + valor_aportado, 2)
             valor_disponivel = round(
@@ -220,6 +256,8 @@ def gerar_tabelas_contratos(df_empresas, data_referencia=None):
                 data_referencia,
                 random.random() < PROBABILIDADE_OUTLIER,
             )
+            if encerrado_por_risco:
+                status = "Encerrado"
             escopo = selecionar_escopo(empresa["Razao_Social"])
             contratos.append({
                 "Cód_Contrato": codigo_contrato,
@@ -234,6 +272,9 @@ def gerar_tabelas_contratos(df_empresas, data_referencia=None):
                 "Saldo": saldo,
                 "Tipo_Contrato": "Contrato Renovado" if renovado else "Novo Contrato",
                 "Status": status,
+                "Data_Avaliacao_Risco": avaliacao_encerramento["Data_Avaliacao"] if encerrado_por_risco else "",
+                "Risco_Final": avaliacao_encerramento["Risco_Final"] if encerrado_por_risco else avaliacao_inicial["Risco_Final"],
+                "Motivo_Encerramento": "Homologação negada por risco final alto" if encerrado_por_risco else "",
             })
 
     return pd.DataFrame(contratos), pd.DataFrame(aditamentos, columns=COLUNAS_ADITAMENTOS)
@@ -247,10 +288,19 @@ def localizar_arquivo_empresas():
     return arquivos[-1]
 
 
+def localizar_arquivo_riscos():
+    arquivos = sorted(RAW_DIR.glob("homologacoes_risco_*.csv"))
+    if not arquivos:
+        raise FileNotFoundError("Execute risk_generator.py antes de gerar contratos.")
+    return arquivos[-1]
+
+
 if __name__ == "__main__":
     arquivo_empresas = localizar_arquivo_empresas()
+    arquivo_riscos = localizar_arquivo_riscos()
     df_empresas = pd.read_csv(arquivo_empresas, dtype={"CNPJ": "string"})
-    df_contratos, df_aditamentos = gerar_tabelas_contratos(df_empresas)
+    df_riscos = pd.read_csv(arquivo_riscos, dtype={"CNPJ": "string"})
+    df_contratos, df_aditamentos = gerar_tabelas_contratos(df_empresas, df_riscos)
     identificador_lote = datetime.now().strftime("%Y%m%d_%H%M%S")
     arquivo_contratos = RAW_DIR / f"contratos_ficticios_{identificador_lote}.csv"
     arquivo_aditamentos = RAW_DIR / f"aditamentos_{identificador_lote}.csv"
