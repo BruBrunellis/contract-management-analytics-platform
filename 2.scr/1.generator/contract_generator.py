@@ -11,6 +11,10 @@ from dateutil.relativedelta import relativedelta
 RAW_DIR = Path(__file__).resolve().parents[2] / "1.data" / "1.raw"
 PROBABILIDADE_OUTLIER = 0.10
 PROBABILIDADE_APORTE = 0.35
+PROBABILIDADE_OUTLIER_QTD_CONTRATOS = 0.12
+LIMITE_EXPOSICAO_NORMAL = (0.20, 0.45)
+LIMITE_EXPOSICAO_OUTLIER = (0.45, 0.90)
+FAIXA_CONTRATOS_GRANDE_OUTLIER = (6, 12)
 TIMEZONE = ZoneInfo("America/Sao_Paulo")
 
 ESCOPOS_GERAIS = [
@@ -42,10 +46,17 @@ COLUNAS_ADITAMENTOS = [
 ]
 
 
-def quantidade_contratos(porte, hierarquia):
+def quantidade_contratos(
+    porte,
+    hierarquia,
+    probabilidade_outlier=PROBABILIDADE_OUTLIER_QTD_CONTRATOS,
+):
     """Define a quantidade de contratos conforme porte e posição societária."""
     if hierarquia == "Filial":
         return random.randint(1, 3) if porte in {"Médio", "Grande"} else 1
+
+    if porte == "Grande" and random.random() < probabilidade_outlier:
+        return random.randint(*FAIXA_CONTRATOS_GRANDE_OUTLIER)
 
     faixas_matriz = {
         "Grande": (1, 5),
@@ -54,6 +65,41 @@ def quantidade_contratos(porte, hierarquia):
         "Microempresa": (1, 1),
     }
     return random.randint(*faixas_matriz[porte])
+
+
+def faturamento_base_contrato(empresa, vigencia_inicio):
+    """Retorna o faturamento do ano de início, limitado ao primeiro ano disponível."""
+    ano_base = max(vigencia_inicio.year, 2022)
+    return float(empresa[f"Faturamento_{ano_base}"]), ano_base
+
+
+def calcular_limites_exposicao(empresa, fator_limite):
+    """Define a capacidade anual de contratos do fornecedor com este comprador."""
+    return {
+        ano: round(float(empresa[f"Faturamento_{ano}"]) * fator_limite, 2)
+        for ano in range(2022, 2027)
+    }
+
+
+def calcular_valor_original(
+    empresa,
+    vigencia_inicio,
+    quantidade_planejada,
+    exposicao_anual,
+    limites_exposicao,
+):
+    """Calcula um valor anualizado sem exceder a exposição anual do fornecedor."""
+    faturamento, ano_base = faturamento_base_contrato(empresa, vigencia_inicio)
+    capacidade_disponivel = round(limites_exposicao[ano_base] - exposicao_anual[ano_base], 2)
+    if capacidade_disponivel <= 0:
+        return 0.0
+
+    fator_maximo = min(0.35, limites_exposicao[ano_base] / faturamento / quantidade_planejada * 1.5)
+    fator_minimo = min(0.01, fator_maximo / 4)
+    valor_sugerido = faturamento * random.uniform(fator_minimo, fator_maximo)
+    valor_original = round(min(valor_sugerido, capacidade_disponivel), 2)
+    exposicao_anual[ano_base] = round(exposicao_anual[ano_base] + valor_original, 2)
+    return valor_original
 
 
 def selecionar_escopo(razao_social):
@@ -73,9 +119,17 @@ def distribuir_valor(valor_total, quantidade):
     return valores
 
 
-def gerar_aportes(codigo_contrato, inicio_ciclo, fim_ciclo, valor_renovacao, sequencia, eh_outlier):
+def gerar_aportes(
+    codigo_contrato,
+    inicio_ciclo,
+    fim_ciclo,
+    valor_renovacao,
+    sequencia,
+    eh_outlier,
+    probabilidade_aporte=PROBABILIDADE_APORTE,
+):
     """Cria aportes pontuais dentro de um ciclo de renovação."""
-    if not eh_outlier and random.random() >= PROBABILIDADE_APORTE:
+    if not eh_outlier and random.random() >= probabilidade_aporte:
         return [], 0.0, sequencia
 
     fator_aporte = (
@@ -119,7 +173,19 @@ def obter_avaliacao_risco(df_riscos, cnpj, data_evento):
     return candidatas.sort_values("Data_Avaliacao").iloc[-1]
 
 
-def gerar_aditamentos(codigo_contrato, cnpj, valor_original, vigencia_inicio, vigencia_fim, duracao_meses, renovado, df_riscos, data_referencia):
+def gerar_aditamentos(
+    codigo_contrato,
+    cnpj,
+    valor_original,
+    vigencia_inicio,
+    vigencia_fim,
+    duracao_meses,
+    renovado,
+    df_riscos,
+    data_referencia,
+    probabilidade_outlier=PROBABILIDADE_OUTLIER,
+    probabilidade_aporte=PROBABILIDADE_APORTE,
+):
     """Gera renovação apenas quando a avaliação de risco anual é aprovada."""
     if not renovado:
         return [], 0.0, 0.0, False, None, None
@@ -157,7 +223,7 @@ def gerar_aditamentos(codigo_contrato, cnpj, valor_original, vigencia_inicio, vi
             "Sequencia_Aditamento": sequencia,
         })
 
-        eh_outlier = random.random() < PROBABILIDADE_OUTLIER
+        eh_outlier = random.random() < probabilidade_outlier
         aportes, valor_ciclo_aportado, sequencia = gerar_aportes(
             codigo_contrato,
             inicio_ciclo,
@@ -165,6 +231,7 @@ def gerar_aditamentos(codigo_contrato, cnpj, valor_original, vigencia_inicio, vi
             ultimo_valor_anualizado,
             sequencia,
             eh_outlier,
+            probabilidade_aporte,
         )
         aditamentos.extend(aportes)
         valor_aportado += valor_ciclo_aportado
@@ -193,17 +260,34 @@ def calcular_saldo(valor_total, valor_disponivel, vigencia_inicio, vigencia_fim,
     return round(valor_total - valor_consumido, 2), "Ativo"
 
 
-def gerar_tabelas_contratos(df_empresas, df_riscos, data_referencia=None):
+def gerar_tabelas_contratos(
+    df_empresas,
+    df_riscos,
+    data_referencia=None,
+    probabilidade_outlier=PROBABILIDADE_OUTLIER,
+    probabilidade_aporte=PROBABILIDADE_APORTE,
+    probabilidade_outlier_qtd_contratos=PROBABILIDADE_OUTLIER_QTD_CONTRATOS,
+    limite_exposicao_normal=LIMITE_EXPOSICAO_NORMAL,
+    limite_exposicao_outlier=LIMITE_EXPOSICAO_OUTLIER,
+):
     """Gera tabelas de contratos e de aditamentos detalhados."""
     data_referencia = data_referencia or datetime.now(TIMEZONE).date()
     contratos = []
     aditamentos = []
     codigo_counter = 1
-    colunas_faturamento = [coluna for coluna in df_empresas if coluna.startswith("Faturamento_")]
-
     for _, empresa in df_empresas.iterrows():
-        media_faturamento = empresa[colunas_faturamento].astype(float).mean()
-        for _ in range(quantidade_contratos(empresa["Porte_Empresa"], empresa["Hierarquia"])):
+        quantidade_planejada = quantidade_contratos(
+            empresa["Porte_Empresa"],
+            empresa["Hierarquia"],
+            probabilidade_outlier_qtd_contratos,
+        )
+        carteira_outlier = empresa["Porte_Empresa"] == "Grande" and quantidade_planejada > 5
+        faixa_limite = limite_exposicao_outlier if carteira_outlier else limite_exposicao_normal
+        fator_limite = random.uniform(*faixa_limite)
+        limites_exposicao = calcular_limites_exposicao(empresa, fator_limite)
+        exposicao_anual = dict.fromkeys(limites_exposicao, 0.0)
+
+        for _ in range(quantidade_planejada):
             duracao_meses = random.randint(6, 120)
             inicio_minimo = date(2022, 1, 1)
             inicio_maximo = data_referencia - timedelta(days=26)
@@ -212,9 +296,17 @@ def gerar_tabelas_contratos(df_empresas, df_riscos, data_referencia=None):
             avaliacao_inicial = obter_avaliacao_risco(df_riscos, empresa["CNPJ"], vigencia_inicio)
             if avaliacao_inicial is None or avaliacao_inicial["Resultado_Homologacao"] != "Aprovada":
                 continue
+            valor_original = calcular_valor_original(
+                empresa,
+                vigencia_inicio,
+                quantidade_planejada,
+                exposicao_anual,
+                limites_exposicao,
+            )
+            if valor_original <= 0:
+                continue
             codigo_contrato = f"CS{codigo_counter:08d}"
             codigo_counter += 1
-            valor_original = round(media_faturamento * random.uniform(0.01, 0.35), 2)
             renovado = duracao_meses >= 24 and random.choice([True, False])
             aditamentos_contrato, valor_renovado, valor_aportado, encerrado_por_risco, data_encerramento, avaliacao_encerramento = gerar_aditamentos(
                 codigo_contrato,
@@ -226,6 +318,8 @@ def gerar_tabelas_contratos(df_empresas, df_riscos, data_referencia=None):
                 renovado,
                 df_riscos,
                 data_referencia,
+                probabilidade_outlier,
+                probabilidade_aporte,
             )
             if encerrado_por_risco:
                 vigencia_fim = data_encerramento - timedelta(days=1)
@@ -255,7 +349,7 @@ def gerar_tabelas_contratos(df_empresas, df_riscos, data_referencia=None):
                 vigencia_inicio,
                 vigencia_fim,
                 data_referencia,
-                random.random() < PROBABILIDADE_OUTLIER,
+                random.random() < probabilidade_outlier,
             )
             if encerrado_por_risco:
                 status = "Encerrado"

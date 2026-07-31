@@ -53,6 +53,24 @@ python .\2.scr\2.etl\stg_empresas.py
 
 Os geradores selecionam automaticamente a fonte versionada mais recente e preservam data e horário no nome dos arquivos. Execute-os na ordem acima para manter a coerência entre empresas, riscos, contratos, aditamentos e pagamentos.
 
+### Execução orquestrada
+
+Para gerar todas as fontes no mesmo lote, use o orquestrador:
+
+```powershell
+python .\2.scr\run_pipeline.py --interactive
+```
+
+Ou informe parâmetros sem interação:
+
+```powershell
+python .\2.scr\run_pipeline.py --qtd-empresas 500 --seed 42 --data-referencia 2026-07-31
+```
+
+O pipeline grava um `run_manifest_YYYYMMDD_HHMMSS.json` com os parâmetros,
+arquivos produzidos e contagens de cada etapa. Um arquivo JSON também pode ser
+informado com `--config caminho\para\cenario.json` para repetir cenários.
+
 ## Qualidade e CI
 
 ```powershell

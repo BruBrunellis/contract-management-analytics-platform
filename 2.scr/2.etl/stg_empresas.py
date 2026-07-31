@@ -62,7 +62,7 @@ def localizar_arquivo_empresas():
     return arquivos[-1]
 
 
-def preparar_dataframe(arquivo_origem):
+def preparar_dataframe(arquivo_origem, data_carga=None):
     """Lê a origem, padroniza nomes, tipos e colunas de linhagem."""
     df = pd.read_csv(
         arquivo_origem,
@@ -80,7 +80,7 @@ def preparar_dataframe(arquivo_origem):
         df[coluna] = pd.to_numeric(df[coluna], errors="coerce").astype("Int64")
 
     df["source_file"] = arquivo_origem.name
-    df["load_date"] = pd.Timestamp(datetime.now(TIMEZONE).date())
+    df["load_date"] = pd.Timestamp(data_carga or datetime.now(TIMEZONE).date())
     df["source_row_number"] = pd.Series(range(2, len(df) + 2), dtype="Int64")
     return df
 
@@ -138,19 +138,26 @@ def validar_empresas(df):
     return erros
 
 
-def executar_staging():
+def executar_staging(
+    arquivo_origem=None,
+    identificador_lote=None,
+    data_carga=None,
+    staging_dir=STAGING_DIR,
+    exceptions_dir=EXCEPTIONS_DIR,
+):
     """Executa a transformação RAW → STAGING de empresas."""
-    arquivo_origem = localizar_arquivo_empresas()
-    df = preparar_dataframe(arquivo_origem)
+    arquivo_origem = arquivo_origem or localizar_arquivo_empresas()
+    df = preparar_dataframe(arquivo_origem, data_carga)
     df["validation_errors"] = validar_empresas(df)
 
-    STAGING_DIR.mkdir(parents=True, exist_ok=True)
-    EXCEPTIONS_DIR.mkdir(parents=True, exist_ok=True)
+    staging_dir.mkdir(parents=True, exist_ok=True)
+    exceptions_dir.mkdir(parents=True, exist_ok=True)
     validas = df.loc[df["validation_errors"].eq("")].drop(columns="validation_errors")
     invalidas = df.loc[df["validation_errors"].ne("")]
 
-    arquivo_staging = STAGING_DIR / "stg_empresas.parquet"
-    arquivo_excecoes = EXCEPTIONS_DIR / "stg_empresas_invalidas.parquet"
+    sufixo = f"_{identificador_lote}" if identificador_lote else ""
+    arquivo_staging = staging_dir / f"stg_empresas{sufixo}.parquet"
+    arquivo_excecoes = exceptions_dir / f"stg_empresas_invalidas{sufixo}.parquet"
     validas.to_parquet(arquivo_staging, index=False, engine="pyarrow")
     invalidas.to_parquet(arquivo_excecoes, index=False, engine="pyarrow")
 
@@ -159,6 +166,12 @@ def executar_staging():
     print(f"Registros com exceção: {len(invalidas)}")
     print(f"STAGING: {arquivo_staging}")
     print(f"Exceções: {arquivo_excecoes}")
+    return {
+        "arquivo_staging": arquivo_staging,
+        "arquivo_excecoes": arquivo_excecoes,
+        "registros_validos": len(validas),
+        "registros_invalidos": len(invalidas),
+    }
 
 
 if __name__ == "__main__":
