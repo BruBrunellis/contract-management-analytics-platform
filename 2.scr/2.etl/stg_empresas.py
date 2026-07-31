@@ -1,8 +1,9 @@
 """Padroniza e valida a fonte RAW de empresas para a camada STAGING."""
 
-from datetime import date
-from pathlib import Path
 import re
+from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
@@ -19,6 +20,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 RAW_DIR = PROJECT_ROOT / "1.data" / "1.raw"
 STAGING_DIR = PROJECT_ROOT / "1.data" / "2.staging"
 EXCEPTIONS_DIR = STAGING_DIR / "exceptions"
+TIMEZONE = ZoneInfo("America/Sao_Paulo")
 
 RENOMEAR_COLUNAS = {
     "CNPJ": "cnpj",
@@ -78,7 +80,7 @@ def preparar_dataframe(arquivo_origem):
         df[coluna] = pd.to_numeric(df[coluna], errors="coerce").astype("Int64")
 
     df["source_file"] = arquivo_origem.name
-    df["load_date"] = pd.Timestamp(date.today())
+    df["load_date"] = pd.Timestamp(datetime.now(TIMEZONE).date())
     df["source_row_number"] = pd.Series(range(2, len(df) + 2), dtype="Int64")
     return df
 

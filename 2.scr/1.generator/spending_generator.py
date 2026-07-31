@@ -1,17 +1,18 @@
 """Gera pagamentos fictícios a partir de contratos e seus aditamentos."""
 
-from datetime import date, datetime, timedelta
-from pathlib import Path
 import random
 import re
+from datetime import date, datetime, timedelta
+from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
-
 RAW_DIR = Path(__file__).resolve().parents[2] / "1.data" / "1.raw"
 MODELOS_PAGAMENTO = ("Mensal variável", "One-shot", "Concentrado")
 PESOS_MODELOS = (0.75, 0.10, 0.15)
+TIMEZONE = ZoneInfo("America/Sao_Paulo")
 
 
 def data_arquivo_versionado(caminho):
@@ -19,7 +20,7 @@ def data_arquivo_versionado(caminho):
     correspondencia = re.search(r"_(\d{8})(?:_\d{6})?\.csv$", caminho.name)
     if not correspondencia:
         raise ValueError(f"Nome de arquivo sem data de versão: {caminho.name}")
-    return datetime.strptime(correspondencia.group(1), "%Y%m%d").date()
+    return date.fromisoformat(correspondencia.group(1))
 
 
 def identificador_arquivo_versionado(caminho):
@@ -158,7 +159,6 @@ def calcular_incremento(ciclos, consumo_base, data_snapshot, data_referencia):
     if data_referencia <= data_snapshot:
         return 0.0
 
-    capacidade_base = sum(ciclo["valor"] for ciclo in ciclos if ciclo["inicio"] <= data_snapshot)
     capacidade_referencia = sum(ciclo["valor"] for ciclo in ciclos if ciclo["inicio"] <= data_referencia)
     capacidade_restante = max(0.0, capacidade_referencia - consumo_base)
     if capacidade_restante == 0:
@@ -179,7 +179,7 @@ def calcular_incremento(ciclos, consumo_base, data_snapshot, data_referencia):
 
 def gerar_tabela_spending(df_contratos, df_aditamentos, data_snapshot, data_referencia=None):
     """Gera pagamentos até a data de referência, respeitando os ciclos financeiros."""
-    data_referencia = data_referencia or date.today()
+    data_referencia = data_referencia or datetime.now(TIMEZONE).date()
     if data_referencia < data_snapshot:
         raise ValueError("A data de referência não pode ser anterior à data do snapshot de contratos.")
 
@@ -252,14 +252,14 @@ if __name__ == "__main__":
     arquivo_contratos, arquivo_aditamentos, data_snapshot = localizar_arquivos_origem()
     df_contratos = pd.read_csv(arquivo_contratos, dtype={"CNPJ": "string"})
     df_aditamentos = pd.read_csv(arquivo_aditamentos)
-    data_referencia = date.today()
+    data_referencia = datetime.now(TIMEZONE).date()
     df_spending = gerar_tabela_spending(
         df_contratos,
         df_aditamentos,
         data_snapshot,
         data_referencia,
     )
-    identificador_lote = datetime.now().strftime("%Y%m%d_%H%M%S")
+    identificador_lote = datetime.now(TIMEZONE).strftime("%Y%m%d_%H%M%S")
     arquivo_saida = RAW_DIR / f"spending_ficticio_{identificador_lote}.csv"
     df_spending.to_csv(arquivo_saida, index=False, encoding="utf-8-sig")
     print(f"Arquivo de spending gerado: {arquivo_saida}")

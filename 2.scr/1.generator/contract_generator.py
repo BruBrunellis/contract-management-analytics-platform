@@ -1,16 +1,17 @@
 """Gera contratos fictícios e o histórico detalhado de seus aditamentos."""
 
+import random
 from datetime import date, datetime, timedelta
 from pathlib import Path
-import random
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
-
 RAW_DIR = Path(__file__).resolve().parents[2] / "1.data" / "1.raw"
 PROBABILIDADE_OUTLIER = 0.10
 PROBABILIDADE_APORTE = 0.35
+TIMEZONE = ZoneInfo("America/Sao_Paulo")
 
 ESCOPOS_GERAIS = [
     "Aquisição de Equipamentos",
@@ -194,7 +195,7 @@ def calcular_saldo(valor_total, valor_disponivel, vigencia_inicio, vigencia_fim,
 
 def gerar_tabelas_contratos(df_empresas, df_riscos, data_referencia=None):
     """Gera tabelas de contratos e de aditamentos detalhados."""
-    data_referencia = data_referencia or date.today()
+    data_referencia = data_referencia or datetime.now(TIMEZONE).date()
     contratos = []
     aditamentos = []
     codigo_counter = 1
@@ -301,7 +302,7 @@ if __name__ == "__main__":
     df_empresas = pd.read_csv(arquivo_empresas, dtype={"CNPJ": "string"})
     df_riscos = pd.read_csv(arquivo_riscos, dtype={"CNPJ": "string"})
     df_contratos, df_aditamentos = gerar_tabelas_contratos(df_empresas, df_riscos)
-    identificador_lote = datetime.now().strftime("%Y%m%d_%H%M%S")
+    identificador_lote = datetime.now(TIMEZONE).strftime("%Y%m%d_%H%M%S")
     arquivo_contratos = RAW_DIR / f"contratos_ficticios_{identificador_lote}.csv"
     arquivo_aditamentos = RAW_DIR / f"aditamentos_{identificador_lote}.csv"
     df_contratos.to_csv(arquivo_contratos, index=False, encoding="utf-8-sig")

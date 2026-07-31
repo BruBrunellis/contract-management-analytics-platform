@@ -1,14 +1,15 @@
 """Gera empresas fictícias com relações coerentes entre receita, custos e equipe."""
 
+import random
 from datetime import datetime
 from pathlib import Path
-import random
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 
-
 RAW_DIR = Path(__file__).resolve().parents[2] / "1.data" / "1.raw"
 ANO_REFERENCIA = 2026
+TIMEZONE = ZoneInfo("America/Sao_Paulo")
 ATIVIDADES = [
     "Tecnologia", "Serviços", "Comércio", "Inteligência", "Rede", "Logística",
     "Soluções", "Engenharia", "Consultoria",
@@ -248,7 +249,7 @@ def gerar_tabela_empresas(qtd=300):
 if __name__ == "__main__":
     df_empresas = gerar_tabela_empresas(qtd=300)
     RAW_DIR.mkdir(parents=True, exist_ok=True)
-    identificador_lote = datetime.now().strftime("%Y%m%d_%H%M%S")
+    identificador_lote = datetime.now(TIMEZONE).strftime("%Y%m%d_%H%M%S")
     arquivo_saida = RAW_DIR / f"empresas_{identificador_lote}.csv"
     df_empresas.to_csv(arquivo_saida, index=False, encoding="utf-8-sig")
     print(f"Arquivo gerado: {arquivo_saida}")

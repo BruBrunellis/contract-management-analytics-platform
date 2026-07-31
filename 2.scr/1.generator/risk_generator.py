@@ -2,13 +2,14 @@
 
 from datetime import date, datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
-
 RAW_DIR = Path(__file__).resolve().parents[2] / "1.data" / "1.raw"
 ANOS_AVALIACAO = range(2022, 2027)
+TIMEZONE = ZoneInfo("America/Sao_Paulo")
 
 
 def localizar_arquivo_empresas():
@@ -47,7 +48,7 @@ def maior_risco(risco_financeiro, risco_trabalhista):
 
 def gerar_homologacoes_risco(df_empresas, data_referencia=None):
     """Cria uma avaliação anual por empresa, usando os indicadores daquele ano."""
-    data_referencia = data_referencia or date.today()
+    data_referencia = data_referencia or datetime.now(TIMEZONE).date()
     registros = []
     identificador = 1
     for _, empresa in df_empresas.iterrows():
@@ -94,7 +95,7 @@ if __name__ == "__main__":
     arquivo_empresas = localizar_arquivo_empresas()
     df_empresas = pd.read_csv(arquivo_empresas, dtype={"CNPJ": "string"})
     df_riscos = gerar_homologacoes_risco(df_empresas)
-    identificador_lote = datetime.now().strftime("%Y%m%d_%H%M%S")
+    identificador_lote = datetime.now(TIMEZONE).strftime("%Y%m%d_%H%M%S")
     arquivo_saida = RAW_DIR / f"homologacoes_risco_{identificador_lote}.csv"
     df_riscos.to_csv(arquivo_saida, index=False, encoding="utf-8-sig")
     print(f"Arquivo de risco gerado: {arquivo_saida}")
