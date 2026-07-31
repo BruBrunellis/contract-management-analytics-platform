@@ -237,11 +237,17 @@ def gerar_filiais(matriz):
     return filiais
 
 
-def gerar_tabela_empresas(qtd=300):
+def gerar_tabela_empresas(qtd=300, percentual_matrizes_grandes_com_filiais=0.50):
+    """Gera matrizes e filiais conforme o percentual informado."""
+    if qtd <= 0:
+        raise ValueError("A quantidade de empresas deve ser positiva.")
+    if not 0 <= percentual_matrizes_grandes_com_filiais <= 1:
+        raise ValueError("O percentual de matrizes com filiais deve estar entre 0 e 1.")
     cnpjs_existentes = set()
     matrizes = [gerar_empresa_matriz(cnpjs_existentes) for _ in range(qtd)]
     matrizes_grandes = [matriz for matriz in matrizes if matriz["Porte_Empresa"] == "Grande"]
-    selecionadas = random.sample(matrizes_grandes, len(matrizes_grandes) // 2)
+    qtd_selecionadas = round(len(matrizes_grandes) * percentual_matrizes_grandes_com_filiais)
+    selecionadas = random.sample(matrizes_grandes, qtd_selecionadas)
     filiais = [filial for matriz in selecionadas for filial in gerar_filiais(matriz)]
     return pd.DataFrame([*matrizes, *filiais])
 

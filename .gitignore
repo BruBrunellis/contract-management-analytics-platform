@@ -14,6 +14,7 @@ htmlcov/
 
 # Dados gerados pelo pipeline
 1.data/1.raw/*.csv
+1.data/1.raw/run_manifest_*.json
 1.data/2.staging/*.parquet
 1.data/2.staging/exceptions/*.parquet
 
