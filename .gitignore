@@ -1,0 +1,21 @@
+# Ambiente e cache Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Arquivos locais
+.env
+.vscode/
+
+# Dados gerados pelo pipeline
+1.data/1.raw/*.csv
+1.data/2.staging/*.parquet
+1.data/2.staging/exceptions/*.parquet
+
+# Relatórios e arquivos temporários
+*.log
+*.tmp
