@@ -31,7 +31,8 @@ docs/          # Project Charter e documentação complementar
 | Homologações e risco | `risk_generator.py` | `homologacoes_risco_YYYYMMDD_HHMMSS.csv` |
 | Contratos e aditamentos | `contract_generator.py` | `contratos_ficticios_*.csv` e `aditamentos_*.csv` |
 | Pagamentos | `spending_generator.py` | `spending_ficticio_YYYYMMDD_HHMMSS.csv` |
-| Empresas tratadas | `stg_empresas.py` | `stg_empresas_YYYYMMDD.parquet` |
+| Empresas tratadas | `stg_empresas.py` | `stg_empresas_YYYYMMDD_HHMMSS.parquet` |
+| Contratos tratados | `stg_contratos.py` | `stg_contratos_YYYYMMDD_HHMMSS.parquet` |
 
 Todos os dados são fictícios. Os arquivos CSV e Parquet gerados são ignorados pelo Git para que o repositório contenha código, testes e documentação.
 
@@ -49,6 +50,7 @@ python .\2.scr\1.generator\risk_generator.py
 python .\2.scr\1.generator\contract_generator.py
 python .\2.scr\1.generator\spending_generator.py
 python .\2.scr\2.etl\stg_empresas.py
+python .\2.scr\2.etl\stg_contratos.py
 ```
 
 Os geradores selecionam automaticamente a fonte versionada mais recente e preservam data e horário no nome dos arquivos. Execute-os na ordem acima para manter a coerência entre empresas, riscos, contratos, aditamentos e pagamentos.
@@ -92,7 +94,7 @@ O GitHub Actions executa essas mesmas validações em pushes e pull requests par
 - Uma homologação de risco alto pode encerrar ciclos de renovação.
 - Aditamentos registram renovações e aportes separadamente.
 - Contratos vencidos conciliam gasto, valor total e saldo; contratos ativos podem ter pagamentos posteriores à data do snapshot.
-- A staging padroniza identificadores, tipos e metadados de carga, além de separar registros inválidos em uma saída de exceções.
+- A staging padroniza identificadores, tipos e metadados de carga, além de separar registros inválidos em uma saída de exceções. Consulte os [contratos técnicos de staging](docs/staging_contracts.md).
 
 ## Próximos passos
 

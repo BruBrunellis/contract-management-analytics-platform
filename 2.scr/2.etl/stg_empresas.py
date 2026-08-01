@@ -1,26 +1,22 @@
 """Padroniza e valida a fonte RAW de empresas para a camada STAGING."""
 
 import re
-from datetime import datetime
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
 import pandas as pd
-
-try:
-    import pyarrow  # noqa: F401
-except ImportError as erro:
-    raise SystemExit(
-        "O pacote pyarrow é necessário para criar arquivos Parquet. "
-        "Instale as dependências com: .venv\\Scripts\\python.exe -m pip install -r requirements.txt"
-    ) from erro
-
+from staging_framework import (
+    adicionar_erro,
+    adicionar_linhagem,
+    construir_resultado_staging,
+    escrever_parquet,
+    localizar_arquivo_versionado,
+    validar_colunas_obrigatorias,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 RAW_DIR = PROJECT_ROOT / "1.data" / "1.raw"
 STAGING_DIR = PROJECT_ROOT / "1.data" / "2.staging"
 EXCEPTIONS_DIR = STAGING_DIR / "exceptions"
-TIMEZONE = ZoneInfo("America/Sao_Paulo")
 
 RENOMEAR_COLUNAS = {
     "CNPJ": "cnpj",
@@ -56,18 +52,17 @@ def normalizar_identificador(valor):
 
 def localizar_arquivo_empresas():
     """Retorna a versão mais recente da fonte RAW de empresas."""
-    arquivos = sorted(RAW_DIR.glob("empresas_*.csv"))
-    if not arquivos:
-        raise FileNotFoundError("Nenhum arquivo no padrão empresas_YYYYMMDD.csv foi encontrado na camada RAW.")
-    return arquivos[-1]
+    return localizar_arquivo_versionado(RAW_DIR, "empresas_*.csv", "empresas")
 
 
-def preparar_dataframe(arquivo_origem, data_carga=None):
+def preparar_dataframe(arquivo_origem, data_carga=None, identificador_lote=None):
     """Lê a origem, padroniza nomes, tipos e colunas de linhagem."""
-    df = pd.read_csv(
+    bruto = pd.read_csv(
         arquivo_origem,
         dtype={"CNPJ": "string", "CNPJ8": "string", "CNPJ_Matriz": "string"},
-    ).rename(columns=RENOMEAR_COLUNAS)
+    )
+    validar_colunas_obrigatorias(bruto.columns, RENOMEAR_COLUNAS, "empresas")
+    df = bruto.rename(columns=RENOMEAR_COLUNAS)
     df.columns = [coluna.lower() for coluna in df.columns]
 
     for coluna in ("cnpj", "cnpj8", "cnpj_matriz"):
@@ -78,18 +73,7 @@ def preparar_dataframe(arquivo_origem, data_carga=None):
         df[coluna] = pd.to_numeric(df[coluna], errors="coerce")
     for coluna in COLUNAS_INTEIRAS:
         df[coluna] = pd.to_numeric(df[coluna], errors="coerce").astype("Int64")
-
-    df["source_file"] = arquivo_origem.name
-    df["load_date"] = pd.Timestamp(data_carga or datetime.now(TIMEZONE).date())
-    df["source_row_number"] = pd.Series(range(2, len(df) + 2), dtype="Int64")
-    return df
-
-
-def adicionar_erro(erros, mascara, mensagem):
-    """Adiciona uma mensagem de validação às linhas indicadas pela máscara."""
-    erros.loc[mascara] = erros.loc[mascara].map(
-        lambda atual: f"{atual}; {mensagem}" if atual else mensagem
-    )
+    return adicionar_linhagem(df, arquivo_origem, data_carga, identificador_lote)
 
 
 def validar_empresas(df):
@@ -147,31 +131,32 @@ def executar_staging(
 ):
     """Executa a transformação RAW → STAGING de empresas."""
     arquivo_origem = arquivo_origem or localizar_arquivo_empresas()
-    df = preparar_dataframe(arquivo_origem, data_carga)
-    df["validation_errors"] = validar_empresas(df)
-
-    staging_dir.mkdir(parents=True, exist_ok=True)
-    exceptions_dir.mkdir(parents=True, exist_ok=True)
-    validas = df.loc[df["validation_errors"].eq("")].drop(columns="validation_errors")
-    invalidas = df.loc[df["validation_errors"].ne("")]
+    df = preparar_dataframe(arquivo_origem, data_carga, identificador_lote)
+    erros = validar_empresas(df)
+    df["validation_errors"] = erros
 
     sufixo = f"_{identificador_lote}" if identificador_lote else ""
-    arquivo_staging = staging_dir / f"stg_empresas{sufixo}.parquet"
-    arquivo_excecoes = exceptions_dir / f"stg_empresas_invalidas{sufixo}.parquet"
-    validas.to_parquet(arquivo_staging, index=False, engine="pyarrow")
-    invalidas.to_parquet(arquivo_excecoes, index=False, engine="pyarrow")
+    arquivo_staging = Path(staging_dir) / f"stg_empresas{sufixo}.parquet"
+    arquivo_excecoes = Path(exceptions_dir) / f"stg_empresas_invalidas{sufixo}.parquet"
+    validas = df.loc[df["validation_errors"].eq("")].drop(columns="validation_errors")
+    invalidas = df.loc[df["validation_errors"].ne("")]
+    schema = escrever_parquet(validas, arquivo_staging)
+    escrever_parquet(invalidas, arquivo_excecoes)
 
-    print(f"Fonte RAW: {arquivo_origem.name}")
+    print(f"Fonte RAW: {Path(arquivo_origem).name}")
     print(f"Registros válidos: {len(validas)}")
     print(f"Registros com exceção: {len(invalidas)}")
-    print(f"STAGING: {arquivo_staging}")
-    print(f"Exceções: {arquivo_excecoes}")
-    return {
-        "arquivo_staging": arquivo_staging,
-        "arquivo_excecoes": arquivo_excecoes,
-        "registros_validos": len(validas),
-        "registros_invalidos": len(invalidas),
-    }
+    return construir_resultado_staging(
+        tabela="stg_empresas",
+        arquivo_origem=arquivo_origem,
+        arquivo_staging=arquivo_staging,
+        arquivo_excecoes=arquivo_excecoes,
+        total_origem=len(df),
+        total_validos=len(validas),
+        total_invalidos=len(invalidas),
+        schema=schema,
+        erros=erros,
+    )
 
 
 if __name__ == "__main__":
