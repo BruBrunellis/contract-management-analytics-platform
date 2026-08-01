@@ -25,6 +25,7 @@ import company_generator
 import contract_generator
 import risk_generator
 import spending_generator
+import stg_contratos
 import stg_empresas
 
 
@@ -132,6 +133,13 @@ def executar_pipeline(
         staging_dir,
         exceptions_dir,
     )
+    resultado_staging_contratos = stg_contratos.executar_staging(
+        arquivo_contratos,
+        identificador_lote,
+        config.data_referencia,
+        staging_dir,
+        exceptions_dir,
+    )
 
     manifesto = {
         "identificador_lote": identificador_lote,
@@ -145,6 +153,8 @@ def executar_pipeline(
             "spending": str(arquivo_spending),
             "stg_empresas": str(resultado_staging["arquivo_staging"]),
             "stg_empresas_invalidas": str(resultado_staging["arquivo_excecoes"]),
+            "stg_contratos": str(resultado_staging_contratos["arquivo_staging"]),
+            "stg_contratos_invalidos": str(resultado_staging_contratos["arquivo_excecoes"]),
         },
         "contagens": {
             "empresas": len(empresas),
@@ -154,6 +164,12 @@ def executar_pipeline(
             "pagamentos": len(spending),
             "stg_empresas_validas": resultado_staging["registros_validos"],
             "stg_empresas_invalidas": resultado_staging["registros_invalidos"],
+            "stg_contratos_validos": resultado_staging_contratos["registros_validos"],
+            "stg_contratos_invalidos": resultado_staging_contratos["registros_invalidos"],
+        },
+        "staging": {
+            "empresas": resultado_staging["manifesto"],
+            "contratos": resultado_staging_contratos["manifesto"],
         },
     }
     arquivo_manifesto = raw_dir / f"run_manifest_{identificador_lote}.json"

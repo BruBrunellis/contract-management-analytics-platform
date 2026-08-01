@@ -1,5 +1,6 @@
 import importlib.util
 import shutil
+import sys
 import uuid
 from pathlib import Path
 
@@ -38,8 +39,10 @@ def load_module(filename):
     return module
 
 
-def load_staging_module():
-    path = PROJECT_ROOT / "2.scr" / "2.etl" / "stg_empresas.py"
+def load_staging_module(filename="stg_empresas.py"):
+    path = PROJECT_ROOT / "2.scr" / "2.etl" / filename
+    if str(path.parent) not in sys.path:
+        sys.path.insert(0, str(path.parent))
     spec = importlib.util.spec_from_file_location(path.stem, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
