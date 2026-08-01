@@ -1,7 +1,33 @@
 import importlib.util
+import shutil
+import uuid
 from pathlib import Path
 
+import pytest
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PYTEST_TEMP_ROOT = PROJECT_ROOT / ".pytest_tmp"
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_configure(config):
+    """Give each test session a fresh temporary directory on Windows."""
+    PYTEST_TEMP_ROOT.mkdir(exist_ok=True)
+    session_temp_dir = PYTEST_TEMP_ROOT / f"run-{uuid.uuid4().hex}"
+    config.option.basetemp = session_temp_dir
+    config._session_temp_dir = session_temp_dir
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_sessionstart(session):
+    """Apply the directory after pytest has created its temporary-path factory."""
+    session.config._tmp_path_factory._given_basetemp = session.config._session_temp_dir
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_sessionfinish(session, exitstatus):
+    """Remove the session directory without touching another test run."""
+    shutil.rmtree(session.config._session_temp_dir, ignore_errors=True)
 
 
 def load_module(filename):
