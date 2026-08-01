@@ -78,6 +78,12 @@ ruff check .
 pytest
 ```
 
+No Windows, o `pytest` cria um diretório temporário exclusivo para cada
+execução em `.pytest_tmp` e o remove ao finalizar a sessão. Dessa forma, não
+reutiliza nem tenta apagar uma pasta que possa estar bloqueada por outro
+processo. O cache persistente do pytest fica desabilitado para evitar bloqueios
+de `.pytest_cache`.
+
 O GitHub Actions executa essas mesmas validações em pushes e pull requests para `main`.
 
 ## Regras relevantes
