@@ -13,6 +13,16 @@ RAW_DIR = Path(__file__).resolve().parents[2] / "1.data" / "1.raw"
 MODELOS_PAGAMENTO = ("Mensal variável", "One-shot", "Concentrado")
 PESOS_MODELOS = (0.75, 0.10, 0.15)
 TIMEZONE = ZoneInfo("America/Sao_Paulo")
+CENTROS_CUSTO_POR_CATEGORIA = {
+    "Aquisição de Equipamentos": "CC-100",
+    "Consultoria": "CC-200",
+    "Licença de Software": "CC-300",
+    "Manutenção e Suporte": "CC-400",
+    "Outsourcing de TI": "CC-500",
+    "Serviços de Logística": "CC-600",
+    "Treinamento e Capacitação": "CC-700",
+    "Serviços de Infraestrutura": "CC-800",
+}
 
 
 def data_arquivo_versionado(caminho):
@@ -187,6 +197,8 @@ def gerar_tabela_spending(df_contratos, df_aditamentos, data_snapshot, data_refe
     pagamento_id = 1
     for _, contrato in df_contratos.iterrows():
         codigo_contrato = contrato["Cód_Contrato"]
+        categoria = contrato["Escopo"]
+        centro_custo = CENTROS_CUSTO_POR_CATEGORIA[categoria]
         aditamentos_contrato = df_aditamentos[df_aditamentos["Cód_Contrato"] == codigo_contrato]
         ciclos = construir_ciclos(contrato, aditamentos_contrato)
         consumo_snapshot = round(float(contrato["Valor_Total"]) - float(contrato["Saldo"]), 2)
@@ -224,6 +236,8 @@ def gerar_tabela_spending(df_contratos, df_aditamentos, data_snapshot, data_refe
                     "Cód_Pagamento": f"PAG{pagamento_id:08d}",
                     "Data_Pagamento": data_pagamento.isoformat(),
                     "Valor_Pago": valor_pago,
+                    "Centro_Custo": centro_custo,
+                    "Categoria": categoria,
                 })
                 pagamento_id += 1
 
@@ -243,6 +257,8 @@ def gerar_tabela_spending(df_contratos, df_aditamentos, data_snapshot, data_refe
                         "Cód_Pagamento": f"PAG{pagamento_id:08d}",
                         "Data_Pagamento": data_pagamento.isoformat(),
                         "Valor_Pago": valor_pago,
+                        "Centro_Custo": centro_custo,
+                        "Categoria": categoria,
                     })
                     pagamento_id += 1
     return pd.DataFrame(pagamentos)

@@ -27,6 +27,7 @@ import risk_generator
 import spending_generator
 import stg_contratos
 import stg_empresas
+import stg_pagamentos
 
 
 @dataclass
@@ -140,6 +141,14 @@ def executar_pipeline(
         staging_dir,
         exceptions_dir,
     )
+    resultado_staging_pagamentos = stg_pagamentos.executar_staging(
+        arquivo_spending,
+        identificador_lote,
+        config.data_referencia,
+        staging_dir,
+        exceptions_dir,
+        resultado_staging_contratos["arquivo_staging"],
+    )
 
     manifesto = {
         "identificador_lote": identificador_lote,
@@ -155,6 +164,8 @@ def executar_pipeline(
             "stg_empresas_invalidas": str(resultado_staging["arquivo_excecoes"]),
             "stg_contratos": str(resultado_staging_contratos["arquivo_staging"]),
             "stg_contratos_invalidos": str(resultado_staging_contratos["arquivo_excecoes"]),
+            "stg_pagamentos": str(resultado_staging_pagamentos["arquivo_staging"]),
+            "stg_pagamentos_invalidos": str(resultado_staging_pagamentos["arquivo_excecoes"]),
         },
         "contagens": {
             "empresas": len(empresas),
@@ -166,10 +177,13 @@ def executar_pipeline(
             "stg_empresas_invalidas": resultado_staging["registros_invalidos"],
             "stg_contratos_validos": resultado_staging_contratos["registros_validos"],
             "stg_contratos_invalidos": resultado_staging_contratos["registros_invalidos"],
+            "stg_pagamentos_validos": resultado_staging_pagamentos["registros_validos"],
+            "stg_pagamentos_invalidos": resultado_staging_pagamentos["registros_invalidos"],
         },
         "staging": {
             "empresas": resultado_staging["manifesto"],
             "contratos": resultado_staging_contratos["manifesto"],
+            "pagamentos": resultado_staging_pagamentos["manifesto"],
         },
     }
     arquivo_manifesto = raw_dir / f"run_manifest_{identificador_lote}.json"

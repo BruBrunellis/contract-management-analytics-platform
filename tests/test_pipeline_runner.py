@@ -25,3 +25,4 @@ def test_pipeline_runner_gera_arquivos_do_mesmo_lote(tmp_path):
     assert manifesto["contagens"]["empresas"] >= 30
     assert manifesto["staging"]["contratos"]["row_counts"]["valid"] == manifesto["contagens"]["stg_contratos_validos"]
     assert manifesto["staging"]["empresas"]["contract_version"] == "1.0"
+    assert manifesto["staging"]["pagamentos"]["row_counts"]["valid"] == manifesto["contagens"]["stg_pagamentos_validos"]

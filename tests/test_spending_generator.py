@@ -19,6 +19,8 @@ def test_spending_de_contratos_vencidos_concilia_com_saldo():
 
     assert spending["Cód_Pagamento"].is_unique
     assert (spending["Valor_Pago"] > 0).all()
+    assert {"Centro_Custo", "Categoria"}.issubset(spending.columns)
+    assert spending["Centro_Custo"].str.fullmatch(r"CC-\d{3}").all()
     assert (
         totais.reindex(vencidos.index, fill_value=0).round(2)
         == (vencidos["Valor_Total"] - vencidos["Saldo"]).round(2)
