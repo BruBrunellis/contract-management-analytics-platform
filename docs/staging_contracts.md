@@ -40,3 +40,20 @@ Grão: um contrato por `contract_id`.
 | `closure_reason` | string | Obrigatório para encerrados e nulo nos demais. |
 
 A saída é `stg_contratos_<lote>.parquet` e as exceções são `stg_contratos_invalidos_<lote>.parquet`. A validação de referência contra fornecedor será executada na camada curated, para que o staging continue sendo uma representação rastreável e independente de cada fonte.
+
+## `stg_pagamentos`
+
+Grão: um pagamento por `payment_id`. A fonte RAW publica `Centro_Custo` e `Categoria`, definidos deterministicamente pelo escopo do contrato no gerador. A staging deriva `supplier_cnpj8` a partir do CNPJ completo e valida `contract_id` contra os contratos válidos de `stg_contratos` do mesmo lote.
+
+| Campo | Tipo Parquet | Regra principal |
+|---|---|---|
+| `payment_id` | string | Único; padrão `PAG########`. |
+| `contract_id` | string | Obrigatório; deve existir em `stg_contratos`. |
+| `supplier_cnpj`, `supplier_cnpj8` | string | CNPJ de 14 dígitos e prefixo de 8 dígitos. |
+| `supplier_name` | string | Obrigatório. |
+| `payment_date` | date32 | Obrigatória e válida. |
+| `payment_value` | decimal(18,2) | Obrigatório e estritamente positivo. |
+| `cost_center` | string | Padrão `CC-999`. |
+| `payment_category` | string | Obrigatória e normalizada. |
+
+A saída é `stg_pagamentos_<lote>.parquet` e as exceções são `stg_pagamentos_invalidos_<lote>.parquet`.
