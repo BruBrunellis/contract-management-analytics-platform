@@ -27,6 +27,7 @@ import risk_generator
 import spending_generator
 import stg_contratos
 import stg_empresas
+import stg_homologacoes_risco
 import stg_pagamentos
 
 
@@ -134,6 +135,13 @@ def executar_pipeline(
         staging_dir,
         exceptions_dir,
     )
+    resultado_staging_riscos = stg_homologacoes_risco.executar_staging(
+        arquivo_riscos,
+        identificador_lote,
+        config.data_referencia,
+        staging_dir,
+        exceptions_dir,
+    )
     resultado_staging_contratos = stg_contratos.executar_staging(
         arquivo_contratos,
         identificador_lote,
@@ -162,6 +170,8 @@ def executar_pipeline(
             "spending": str(arquivo_spending),
             "stg_empresas": str(resultado_staging["arquivo_staging"]),
             "stg_empresas_invalidas": str(resultado_staging["arquivo_excecoes"]),
+            "stg_homologacoes_risco": str(resultado_staging_riscos["arquivo_staging"]),
+            "stg_homologacoes_risco_invalidas": str(resultado_staging_riscos["arquivo_excecoes"]),
             "stg_contratos": str(resultado_staging_contratos["arquivo_staging"]),
             "stg_contratos_invalidos": str(resultado_staging_contratos["arquivo_excecoes"]),
             "stg_pagamentos": str(resultado_staging_pagamentos["arquivo_staging"]),
@@ -175,6 +185,8 @@ def executar_pipeline(
             "pagamentos": len(spending),
             "stg_empresas_validas": resultado_staging["registros_validos"],
             "stg_empresas_invalidas": resultado_staging["registros_invalidos"],
+            "stg_homologacoes_risco_validas": resultado_staging_riscos["registros_validos"],
+            "stg_homologacoes_risco_invalidas": resultado_staging_riscos["registros_invalidos"],
             "stg_contratos_validos": resultado_staging_contratos["registros_validos"],
             "stg_contratos_invalidos": resultado_staging_contratos["registros_invalidos"],
             "stg_pagamentos_validos": resultado_staging_pagamentos["registros_validos"],
@@ -182,6 +194,7 @@ def executar_pipeline(
         },
         "staging": {
             "empresas": resultado_staging["manifesto"],
+            "homologacoes_risco": resultado_staging_riscos["manifesto"],
             "contratos": resultado_staging_contratos["manifesto"],
             "pagamentos": resultado_staging_pagamentos["manifesto"],
         },

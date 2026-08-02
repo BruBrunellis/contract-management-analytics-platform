@@ -34,6 +34,7 @@ docs/          # Project Charter e documentação complementar
 | Empresas tratadas | `stg_empresas.py` | `stg_empresas_YYYYMMDD_HHMMSS.parquet` |
 | Contratos tratados | `stg_contratos.py` | `stg_contratos_YYYYMMDD_HHMMSS.parquet` |
 | Pagamentos tratados | `stg_pagamentos.py` | `stg_pagamentos_YYYYMMDD_HHMMSS.parquet` |
+| Homologações e risco tratados | `stg_homologacoes_risco.py` | `stg_homologacoes_risco_YYYYMMDD_HHMMSS.parquet` |
 
 Todos os dados são fictícios. Os arquivos CSV e Parquet gerados são ignorados pelo Git para que o repositório contenha código, testes e documentação.
 
@@ -53,6 +54,7 @@ python .\2.scr\1.generator\spending_generator.py
 python .\2.scr\2.etl\stg_empresas.py
 python .\2.scr\2.etl\stg_contratos.py
 python .\2.scr\2.etl\stg_pagamentos.py
+python .\2.scr\2.etl\stg_homologacoes_risco.py
 ```
 
 Os geradores selecionam automaticamente a fonte versionada mais recente e preservam data e horário no nome dos arquivos. Execute-os na ordem acima para manter a coerência entre empresas, riscos, contratos, aditamentos e pagamentos.
