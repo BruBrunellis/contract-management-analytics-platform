@@ -33,6 +33,7 @@ docs/          # Project Charter e documentação complementar
 | Pagamentos | `spending_generator.py` | `spending_ficticio_YYYYMMDD_HHMMSS.csv` |
 | Empresas tratadas | `stg_empresas.py` | `stg_empresas_YYYYMMDD_HHMMSS.parquet` |
 | Contratos tratados | `stg_contratos.py` | `stg_contratos_YYYYMMDD_HHMMSS.parquet` |
+| Aditamentos tratados | `stg_aditamentos.py` | `stg_aditamentos_YYYYMMDD_HHMMSS.parquet` |
 | Pagamentos tratados | `stg_pagamentos.py` | `stg_pagamentos_YYYYMMDD_HHMMSS.parquet` |
 | Homologações e risco tratados | `stg_homologacoes_risco.py` | `stg_homologacoes_risco_YYYYMMDD_HHMMSS.parquet` |
 
@@ -53,6 +54,7 @@ python .\2.scr\1.generator\contract_generator.py
 python .\2.scr\1.generator\spending_generator.py
 python .\2.scr\2.etl\stg_empresas.py
 python .\2.scr\2.etl\stg_contratos.py
+python .\2.scr\2.etl\stg_aditamentos.py
 python .\2.scr\2.etl\stg_pagamentos.py
 python .\2.scr\2.etl\stg_homologacoes_risco.py
 ```
@@ -102,9 +104,8 @@ O GitHub Actions executa essas mesmas validações em pushes e pull requests par
 
 ## Próximos passos
 
-1. Criar staging para contratos, aditamentos, riscos e spending.
-2. Construir dimensões e fatos na camada curated.
-3. Implementar reconciliações, métricas SQL e dashboard.
-4. Centralizar utilitários compartilhados de arquivos versionados e parâmetros de execução quando a estrutura de código migrar para um pacote `src/`.
+1. Construir dimensões e fatos na camada curated.
+2. Implementar reconciliações, métricas SQL e dashboard.
+3. Centralizar utilitários compartilhados de arquivos versionados e parâmetros de execução quando a estrutura de código migrar para um pacote `src/`.
 
 Consulte o [Project Charter](docs/Contract_Management_Analytics_Project_Charter.docx) para o planejamento detalhado.

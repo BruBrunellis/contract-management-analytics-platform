@@ -25,6 +25,7 @@ import company_generator
 import contract_generator
 import risk_generator
 import spending_generator
+import stg_aditamentos
 import stg_contratos
 import stg_empresas
 import stg_homologacoes_risco
@@ -149,6 +150,14 @@ def executar_pipeline(
         staging_dir,
         exceptions_dir,
     )
+    resultado_staging_aditamentos = stg_aditamentos.executar_staging(
+        arquivo_aditamentos,
+        identificador_lote,
+        config.data_referencia,
+        staging_dir,
+        exceptions_dir,
+        resultado_staging_contratos["arquivo_staging"],
+    )
     resultado_staging_pagamentos = stg_pagamentos.executar_staging(
         arquivo_spending,
         identificador_lote,
@@ -174,6 +183,8 @@ def executar_pipeline(
             "stg_homologacoes_risco_invalidas": str(resultado_staging_riscos["arquivo_excecoes"]),
             "stg_contratos": str(resultado_staging_contratos["arquivo_staging"]),
             "stg_contratos_invalidos": str(resultado_staging_contratos["arquivo_excecoes"]),
+            "stg_aditamentos": str(resultado_staging_aditamentos["arquivo_staging"]),
+            "stg_aditamentos_invalidos": str(resultado_staging_aditamentos["arquivo_excecoes"]),
             "stg_pagamentos": str(resultado_staging_pagamentos["arquivo_staging"]),
             "stg_pagamentos_invalidos": str(resultado_staging_pagamentos["arquivo_excecoes"]),
         },
@@ -189,6 +200,8 @@ def executar_pipeline(
             "stg_homologacoes_risco_invalidas": resultado_staging_riscos["registros_invalidos"],
             "stg_contratos_validos": resultado_staging_contratos["registros_validos"],
             "stg_contratos_invalidos": resultado_staging_contratos["registros_invalidos"],
+            "stg_aditamentos_validos": resultado_staging_aditamentos["registros_validos"],
+            "stg_aditamentos_invalidos": resultado_staging_aditamentos["registros_invalidos"],
             "stg_pagamentos_validos": resultado_staging_pagamentos["registros_validos"],
             "stg_pagamentos_invalidos": resultado_staging_pagamentos["registros_invalidos"],
         },
@@ -196,6 +209,7 @@ def executar_pipeline(
             "empresas": resultado_staging["manifesto"],
             "homologacoes_risco": resultado_staging_riscos["manifesto"],
             "contratos": resultado_staging_contratos["manifesto"],
+            "aditamentos": resultado_staging_aditamentos["manifesto"],
             "pagamentos": resultado_staging_pagamentos["manifesto"],
         },
     }
