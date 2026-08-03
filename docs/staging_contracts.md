@@ -41,6 +41,24 @@ Grão: um contrato por `contract_id`.
 
 A saída é `stg_contratos_<lote>.parquet` e as exceções são `stg_contratos_invalidos_<lote>.parquet`. A validação de referência contra fornecedor será executada na camada curated, para que o staging continue sendo uma representação rastreável e independente de cada fonte.
 
+## `stg_homologacoes_risco`
+
+Grão: uma avaliação anual de risco por `risk_assessment_id`. A staging deriva `supplier_cnpj8` do CNPJ e mantém os campos de homologação, risco, rating e score com nomes técnicos normalizados.
+
+| Campo | Tipo Parquet | Regra principal |
+|---|---|---|
+| `risk_assessment_id` | string | Único; padrão `RSK#########`. |
+| `supplier_cnpj`, `supplier_cnpj8` | string | CNPJ de 14 dígitos e prefixo de 8 dígitos. |
+| `assessment_date` | date32 | Obrigatória e válida. |
+| `last_approval_date`, `expiration_date` | date32 | Exigidas para homologações aprovadas. |
+| `homologation_result` | string | `aprovada` ou `reprovada`. |
+| `homologation_status` | string | `ativa`, `expirada` ou `negada`. |
+| `financial_risk`, `labor_risk`, `final_risk` | string | `final_risk` é o maior risco componente. |
+| `credit_rating` | string | Rating permitido pelo contrato. |
+| Campos de score | float64 | Numéricos; índices não negativos quando aplicável. |
+
+Uma homologação aprovada não pode ter risco final alto e precisa de datas de aprovação e expiração. Uma reprovada deve estar negada, com risco alto e sem essas datas. A saída é `stg_homologacoes_risco_<lote>.parquet`; as exceções são `stg_homologacoes_risco_invalidas_<lote>.parquet`.
+
 ## `stg_pagamentos`
 
 Grão: um pagamento por `payment_id`. A fonte RAW publica `Centro_Custo` e `Categoria`, definidos deterministicamente pelo escopo do contrato no gerador. A staging deriva `supplier_cnpj8` a partir do CNPJ completo e valida `contract_id` contra os contratos válidos de `stg_contratos` do mesmo lote.
