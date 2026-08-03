@@ -41,6 +41,21 @@ Grão: um contrato por `contract_id`.
 
 A saída é `stg_contratos_<lote>.parquet` e as exceções são `stg_contratos_invalidos_<lote>.parquet`. A validação de referência contra fornecedor será executada na camada curated, para que o staging continue sendo uma representação rastreável e independente de cada fonte.
 
+## `stg_aditamentos`
+
+Grão: um evento de renovação ou aporte por `amendment_id`. Como a fonte RAW não possui identificador próprio, a staging o deriva de forma determinística a partir de `contract_id` e `amendment_sequence`.
+
+| Campo | Tipo Parquet | Regra principal |
+|---|---|---|
+| `amendment_id` | string | ID derivado no formato `AMD-<contract_id>-<sequência>`. |
+| `contract_id` | string | Obrigatório; padrão `CS########` e existente em `stg_contratos` do lote. |
+| `amendment_type` | string | `renovacao` ou `aporte`. |
+| `validity_start_date`, `validity_end_date` | date32 | Obrigatórias; início não posterior ao fim. |
+| `amendment_value` | decimal(18,2) | Obrigatório e estritamente positivo. |
+| `amendment_sequence` | int64 | Inteira, positiva e única por contrato. |
+
+Um aporte precisa estar integralmente contido na vigência de uma renovação do mesmo contrato. A saída é `stg_aditamentos_<lote>.parquet` e as exceções são `stg_aditamentos_invalidos_<lote>.parquet`.
+
 ## `stg_homologacoes_risco`
 
 Grão: uma avaliação anual de risco por `risk_assessment_id`. A staging deriva `supplier_cnpj8` do CNPJ e mantém os campos de homologação, risco, rating e score com nomes técnicos normalizados.
