@@ -18,6 +18,8 @@ htmlcov/
 1.data/1.raw/run_manifest_*.json
 1.data/2.staging/*.parquet
 1.data/2.staging/exceptions/*.parquet
+1.data/3.curated/*.parquet
+1.data/3.curated/exceptions/*.parquet
 
 # Relatórios e arquivos temporários
 *.log
