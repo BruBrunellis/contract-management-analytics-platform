@@ -19,6 +19,7 @@ Plataforma de dados fictícios para análise de contratos, fornecedores, riscos,
 2.scr/
   1.generator/ # Geradores das fontes primárias
   2.etl/       # Transformações da camada staging
+  3.curated/   # Publicações do modelo dimensional
 tests/         # Testes automatizados
 docs/          # Project Charter e documentação complementar
 ```
@@ -36,6 +37,8 @@ docs/          # Project Charter e documentação complementar
 | Aditamentos tratados | `stg_aditamentos.py` | `stg_aditamentos_YYYYMMDD_HHMMSS.parquet` |
 | Pagamentos tratados | `stg_pagamentos.py` | `stg_pagamentos_YYYYMMDD_HHMMSS.parquet` |
 | Homologações e risco tratados | `stg_homologacoes_risco.py` | `stg_homologacoes_risco_YYYYMMDD_HHMMSS.parquet` |
+| Dimensão de fornecedores | `dim_fornecedores.py` | `dim_supplier_YYYYMMDD_HHMMSS.parquet` |
+| Dimensão de grupos econômicos | `dim_fornecedores.py` | `dim_economic_group_YYYYMMDD_HHMMSS.parquet` |
 
 Todos os dados são fictícios. Os arquivos CSV e Parquet gerados são ignorados pelo Git para que o repositório contenha código, testes e documentação.
 
@@ -57,6 +60,7 @@ python .\2.scr\2.etl\stg_contratos.py
 python .\2.scr\2.etl\stg_aditamentos.py
 python .\2.scr\2.etl\stg_pagamentos.py
 python .\2.scr\2.etl\stg_homologacoes_risco.py
+python .\2.scr\3.curated\dim_fornecedores.py
 ```
 
 Os geradores selecionam automaticamente a fonte versionada mais recente e preservam data e horário no nome dos arquivos. Execute-os na ordem acima para manter a coerência entre empresas, riscos, contratos, aditamentos e pagamentos.
@@ -101,6 +105,7 @@ O GitHub Actions executa essas mesmas validações em pushes e pull requests par
 - Aditamentos registram renovações e aportes separadamente.
 - Contratos vencidos conciliam gasto, valor total e saldo; contratos ativos podem ter pagamentos posteriores à data do snapshot.
 - A staging padroniza identificadores, tipos e metadados de carga, além de separar registros inválidos em uma saída de exceções. Consulte os [contratos técnicos de staging](docs/staging_contracts.md).
+- A camada curated publica as dimensões de fornecedores e grupos econômicos a partir da staging válida. Consulte os [contratos técnicos curated](docs/curated_contracts.md).
 
 ## Próximos passos
 

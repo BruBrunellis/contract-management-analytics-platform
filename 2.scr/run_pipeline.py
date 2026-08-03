@@ -16,13 +16,18 @@ STAGING_DIR = PROJECT_ROOT / "1.data" / "2.staging"
 EXCEPTIONS_DIR = STAGING_DIR / "exceptions"
 GENERATOR_DIR = SCRIPT_DIR / "1.generator"
 ETL_DIR = SCRIPT_DIR / "2.etl"
+CURATED_SCRIPT_DIR = SCRIPT_DIR / "3.curated"
+CURATED_DIR = PROJECT_ROOT / "1.data" / "3.curated"
+CURATED_EXCEPTIONS_DIR = CURATED_DIR / "exceptions"
 TIMEZONE = ZoneInfo("America/Sao_Paulo")
 
 sys.path.insert(0, str(GENERATOR_DIR))
 sys.path.insert(0, str(ETL_DIR))
+sys.path.insert(0, str(CURATED_SCRIPT_DIR))
 
 import company_generator
 import contract_generator
+import dim_fornecedores
 import risk_generator
 import spending_generator
 import stg_aditamentos
@@ -84,6 +89,8 @@ def executar_pipeline(
     raw_dir=RAW_DIR,
     staging_dir=STAGING_DIR,
     exceptions_dir=EXCEPTIONS_DIR,
+    curated_dir=CURATED_DIR,
+    curated_exceptions_dir=CURATED_EXCEPTIONS_DIR,
     identificador_lote=None,
 ):
     """Executa todas as etapas usando o mesmo lote e os mesmos parâmetros."""
@@ -136,6 +143,12 @@ def executar_pipeline(
         staging_dir,
         exceptions_dir,
     )
+    resultado_curated_fornecedores = dim_fornecedores.executar_publicacao(
+        resultado_staging["arquivo_staging"],
+        identificador_lote,
+        curated_dir,
+        curated_exceptions_dir,
+    )
     resultado_staging_riscos = stg_homologacoes_risco.executar_staging(
         arquivo_riscos,
         identificador_lote,
@@ -179,6 +192,9 @@ def executar_pipeline(
             "spending": str(arquivo_spending),
             "stg_empresas": str(resultado_staging["arquivo_staging"]),
             "stg_empresas_invalidas": str(resultado_staging["arquivo_excecoes"]),
+            "dim_supplier": str(resultado_curated_fornecedores["arquivo_dim_supplier"]),
+            "dim_economic_group": str(resultado_curated_fornecedores["arquivo_dim_economic_group"]),
+            "dim_supplier_resolution_exceptions": str(resultado_curated_fornecedores["arquivo_excecoes"]),
             "stg_homologacoes_risco": str(resultado_staging_riscos["arquivo_staging"]),
             "stg_homologacoes_risco_invalidas": str(resultado_staging_riscos["arquivo_excecoes"]),
             "stg_contratos": str(resultado_staging_contratos["arquivo_staging"]),
@@ -196,6 +212,9 @@ def executar_pipeline(
             "pagamentos": len(spending),
             "stg_empresas_validas": resultado_staging["registros_validos"],
             "stg_empresas_invalidas": resultado_staging["registros_invalidos"],
+            "dim_supplier": resultado_curated_fornecedores["fornecedores_publicados"],
+            "dim_economic_group": resultado_curated_fornecedores["grupos_publicados"],
+            "dim_supplier_resolution_exceptions": resultado_curated_fornecedores["registros_invalidos"],
             "stg_homologacoes_risco_validas": resultado_staging_riscos["registros_validos"],
             "stg_homologacoes_risco_invalidas": resultado_staging_riscos["registros_invalidos"],
             "stg_contratos_validos": resultado_staging_contratos["registros_validos"],
@@ -211,6 +230,9 @@ def executar_pipeline(
             "contratos": resultado_staging_contratos["manifesto"],
             "aditamentos": resultado_staging_aditamentos["manifesto"],
             "pagamentos": resultado_staging_pagamentos["manifesto"],
+        },
+        "curated": {
+            "fornecedores": resultado_curated_fornecedores["manifesto"],
         },
     }
     arquivo_manifesto = raw_dir / f"run_manifest_{identificador_lote}.json"

@@ -10,11 +10,14 @@ def test_pipeline_runner_gera_arquivos_do_mesmo_lote(tmp_path):
     config = runner.PipelineConfig(qtd_empresas=30, seed=42, data_referencia=date(2026, 7, 30))
     raw_dir = tmp_path / "raw"
     staging_dir = tmp_path / "staging"
+    curated_dir = tmp_path / "curated"
     resultado = runner.executar_pipeline(
         config,
         raw_dir=raw_dir,
         staging_dir=staging_dir,
         exceptions_dir=staging_dir / "exceptions",
+        curated_dir=curated_dir,
+        curated_exceptions_dir=curated_dir / "exceptions",
         identificador_lote="20260730_120000",
     )
 
@@ -26,5 +29,6 @@ def test_pipeline_runner_gera_arquivos_do_mesmo_lote(tmp_path):
     assert manifesto["staging"]["contratos"]["row_counts"]["valid"] == manifesto["contagens"]["stg_contratos_validos"]
     assert manifesto["staging"]["aditamentos"]["row_counts"]["valid"] == manifesto["contagens"]["stg_aditamentos_validos"]
     assert manifesto["staging"]["empresas"]["contract_version"] == "1.0"
+    assert manifesto["curated"]["fornecedores"]["tables"]["dim_supplier"]["row_count"] == manifesto["contagens"]["dim_supplier"]
     assert manifesto["staging"]["pagamentos"]["row_counts"]["valid"] == manifesto["contagens"]["stg_pagamentos_validos"]
     assert manifesto["staging"]["homologacoes_risco"]["row_counts"]["valid"] == manifesto["contagens"]["stg_homologacoes_risco_validas"]
