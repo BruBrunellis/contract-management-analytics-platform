@@ -27,6 +27,7 @@ sys.path.insert(0, str(CURATED_SCRIPT_DIR))
 
 import company_generator
 import contract_generator
+import dim_calendario_categoria
 import dim_fornecedores
 import risk_generator
 import spending_generator
@@ -179,6 +180,11 @@ def executar_pipeline(
         exceptions_dir,
         resultado_staging_contratos["arquivo_staging"],
     )
+    resultado_curated_compartilhadas = dim_calendario_categoria.executar_publicacao(
+        identificador_lote,
+        staging_dir,
+        curated_dir,
+    )
 
     manifesto = {
         "identificador_lote": identificador_lote,
@@ -195,6 +201,8 @@ def executar_pipeline(
             "dim_supplier": str(resultado_curated_fornecedores["arquivo_dim_supplier"]),
             "dim_economic_group": str(resultado_curated_fornecedores["arquivo_dim_economic_group"]),
             "dim_supplier_resolution_exceptions": str(resultado_curated_fornecedores["arquivo_excecoes"]),
+            "dim_calendar": str(resultado_curated_compartilhadas["arquivo_dim_calendar"]),
+            "dim_category": str(resultado_curated_compartilhadas["arquivo_dim_category"]),
             "stg_homologacoes_risco": str(resultado_staging_riscos["arquivo_staging"]),
             "stg_homologacoes_risco_invalidas": str(resultado_staging_riscos["arquivo_excecoes"]),
             "stg_contratos": str(resultado_staging_contratos["arquivo_staging"]),
@@ -215,6 +223,8 @@ def executar_pipeline(
             "dim_supplier": resultado_curated_fornecedores["fornecedores_publicados"],
             "dim_economic_group": resultado_curated_fornecedores["grupos_publicados"],
             "dim_supplier_resolution_exceptions": resultado_curated_fornecedores["registros_invalidos"],
+            "dim_calendar": resultado_curated_compartilhadas["dias_publicados"],
+            "dim_category": resultado_curated_compartilhadas["categorias_publicadas"],
             "stg_homologacoes_risco_validas": resultado_staging_riscos["registros_validos"],
             "stg_homologacoes_risco_invalidas": resultado_staging_riscos["registros_invalidos"],
             "stg_contratos_validos": resultado_staging_contratos["registros_validos"],
@@ -233,6 +243,7 @@ def executar_pipeline(
         },
         "curated": {
             "fornecedores": resultado_curated_fornecedores["manifesto"],
+            "compartilhadas": resultado_curated_compartilhadas["manifesto"],
         },
     }
     arquivo_manifesto = raw_dir / f"run_manifest_{identificador_lote}.json"
