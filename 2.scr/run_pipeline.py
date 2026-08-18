@@ -30,6 +30,7 @@ import contract_generator
 import dim_calendario_categoria
 import dim_contratos_gastos
 import dim_fornecedores
+import facts_risco_renovacao
 import risk_generator
 import spending_generator
 import stg_aditamentos
@@ -192,6 +193,12 @@ def executar_pipeline(
         curated_dir,
         curated_exceptions_dir,
     )
+    resultado_curated_risco_renovacao = facts_risco_renovacao.executar_publicacao(
+        identificador_lote,
+        staging_dir,
+        curated_dir,
+        curated_exceptions_dir,
+    )
 
     manifesto = {
         "identificador_lote": identificador_lote,
@@ -214,6 +221,10 @@ def executar_pipeline(
             "fact_spending": str(resultado_curated_contratos_gastos["arquivo_fact_spending"]),
             "dim_contract_resolution_exceptions": str(resultado_curated_contratos_gastos["arquivo_excecoes_contratos"]),
             "fact_spending_exceptions": str(resultado_curated_contratos_gastos["arquivo_excecoes_pagamentos"]),
+            "fact_rfi": str(resultado_curated_risco_renovacao["arquivo_fact_rfi"]),
+            "fact_renewal": str(resultado_curated_risco_renovacao["arquivo_fact_renewal"]),
+            "fact_rfi_exceptions": str(resultado_curated_risco_renovacao["arquivo_excecoes_rfi"]),
+            "fact_renewal_exceptions": str(resultado_curated_risco_renovacao["arquivo_excecoes_renovacao"]),
             "stg_homologacoes_risco": str(resultado_staging_riscos["arquivo_staging"]),
             "stg_homologacoes_risco_invalidas": str(resultado_staging_riscos["arquivo_excecoes"]),
             "stg_contratos": str(resultado_staging_contratos["arquivo_staging"]),
@@ -240,6 +251,10 @@ def executar_pipeline(
             "dim_contract_resolution_exceptions": resultado_curated_contratos_gastos["contratos_invalidos"],
             "fact_spending": resultado_curated_contratos_gastos["pagamentos_publicados"],
             "fact_spending_exceptions": resultado_curated_contratos_gastos["pagamentos_invalidos"],
+            "fact_rfi": resultado_curated_risco_renovacao["rfi_publicados"],
+            "fact_rfi_exceptions": resultado_curated_risco_renovacao["rfi_invalidos"],
+            "fact_renewal": resultado_curated_risco_renovacao["renovacoes_publicadas"],
+            "fact_renewal_exceptions": resultado_curated_risco_renovacao["renovacoes_invalidas"],
             "stg_homologacoes_risco_validas": resultado_staging_riscos["registros_validos"],
             "stg_homologacoes_risco_invalidas": resultado_staging_riscos["registros_invalidos"],
             "stg_contratos_validos": resultado_staging_contratos["registros_validos"],
@@ -260,6 +275,7 @@ def executar_pipeline(
             "fornecedores": resultado_curated_fornecedores["manifesto"],
             "compartilhadas": resultado_curated_compartilhadas["manifesto"],
             "contratos_gastos": resultado_curated_contratos_gastos["manifesto"],
+            "risco_renovacao": resultado_curated_risco_renovacao["manifesto"],
         },
     }
     arquivo_manifesto = raw_dir / f"run_manifest_{identificador_lote}.json"
