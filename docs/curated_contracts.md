@@ -80,3 +80,30 @@ Grão: um pagamento por `payment_id` da `stg_pagamentos`.
 | `cost_center`, `payment_value` | Dimensão degenerada e medida monetária decimal. |
 
 Pagamentos sem contrato publicado ou sem outra chave obrigatória são gravados em `fact_spending_exceptions_<lote>.parquet`, com `curated_validation_errors`. O manifesto reconcilia contagem e valor entre staging, fato e exceções.
+
+## `fact_rfi`
+
+Grão: um evento de homologação e risco por `risk_assessment_id`.
+
+| Campo | Regra |
+|---|---|
+| `rfi_key` | Chave determinística: `RFI-<risk_assessment_id>`. |
+| `supplier_key`, `economic_group_key` | Referências obrigatórias ao fornecedor avaliado. |
+| Chaves de calendário | Avaliação obrigatória; aprovação e expiração podem ser nulas. |
+| Atributos de risco | Resultado/status de homologação, riscos, rating e indicadores. |
+
+Eventos sem fornecedor ou data de avaliação resolvida são gravados em `fact_rfi_exceptions_<lote>.parquet`.
+
+## `fact_renewal`
+
+Grão: um evento de aditamento por `amendment_id`, incluindo renovações e aportes.
+
+| Campo | Regra |
+|---|---|
+| `renewal_key` | Chave determinística: `RNL-<amendment_id>`. |
+| `is_renewal` | Verdadeiro somente para `amendment_type = renovacao`. |
+| Chaves de contrato | `contract_key`, fornecedor, grupo e categoria resolvidos por `dim_contract`. |
+| Chaves de calendário | Vigência inicial e final do evento. |
+| `amendment_value` | Valor monetário decimal do evento. |
+
+Eventos sem contrato ou datas resolvidas são gravados em `fact_renewal_exceptions_<lote>.parquet`. O manifesto confirma que cada registro staging foi publicado ou isolado em exceção.
