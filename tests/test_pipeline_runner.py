@@ -33,5 +33,6 @@ def test_pipeline_runner_gera_arquivos_do_mesmo_lote(tmp_path):
     assert manifesto["curated"]["compartilhadas"]["tables"]["dim_calendar"]["row_count"] == manifesto["contagens"]["dim_calendar"]
     assert manifesto["curated"]["contratos_gastos"]["tables"]["fact_spending"]["row_count"] == manifesto["contagens"]["fact_spending"]
     assert manifesto["curated"]["risco_renovacao"]["tables"]["fact_rfi"]["row_count"] == manifesto["contagens"]["fact_rfi"]
+    assert manifesto["curated"]["quality"]["quality_passed"]
     assert manifesto["staging"]["pagamentos"]["row_counts"]["valid"] == manifesto["contagens"]["stg_pagamentos_validos"]
     assert manifesto["staging"]["homologacoes_risco"]["row_counts"]["valid"] == manifesto["contagens"]["stg_homologacoes_risco_validas"]

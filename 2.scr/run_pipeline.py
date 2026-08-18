@@ -31,6 +31,7 @@ import dim_calendario_categoria
 import dim_contratos_gastos
 import dim_fornecedores
 import facts_risco_renovacao
+import reconciliacoes_curated
 import risk_generator
 import spending_generator
 import stg_aditamentos
@@ -55,6 +56,8 @@ class PipelineConfig:
     limite_exposicao_normal_max: float = 0.45
     limite_exposicao_outlier_min: float = 0.45
     limite_exposicao_outlier_max: float = 0.90
+    min_curated_match_rate: float = 0.95
+    financial_reconciliation_tolerance: float = 0.0
 
 
 def converter_data(valor):
@@ -77,6 +80,7 @@ def validar_config(config):
         "limite_exposicao_normal_max": config.limite_exposicao_normal_max,
         "limite_exposicao_outlier_min": config.limite_exposicao_outlier_min,
         "limite_exposicao_outlier_max": config.limite_exposicao_outlier_max,
+        "min_curated_match_rate": config.min_curated_match_rate,
     }
     for nome, valor in probabilidades.items():
         if not 0 <= valor <= 1:
@@ -85,6 +89,8 @@ def validar_config(config):
         raise ValueError("O limite normal mínimo não pode superar o máximo.")
     if config.limite_exposicao_outlier_min > config.limite_exposicao_outlier_max:
         raise ValueError("O limite outlier mínimo não pode superar o máximo.")
+    if config.financial_reconciliation_tolerance < 0:
+        raise ValueError("A tolerância financeira não pode ser negativa.")
 
 
 def executar_pipeline(
@@ -199,6 +205,14 @@ def executar_pipeline(
         curated_dir,
         curated_exceptions_dir,
     )
+    resultado_reconciliacao = reconciliacoes_curated.executar_reconciliacoes(
+        identificador_lote,
+        staging_dir,
+        curated_dir,
+        curated_exceptions_dir,
+        config.min_curated_match_rate,
+        config.financial_reconciliation_tolerance,
+    )
 
     manifesto = {
         "identificador_lote": identificador_lote,
@@ -225,6 +239,8 @@ def executar_pipeline(
             "fact_renewal": str(resultado_curated_risco_renovacao["arquivo_fact_renewal"]),
             "fact_rfi_exceptions": str(resultado_curated_risco_renovacao["arquivo_excecoes_rfi"]),
             "fact_renewal_exceptions": str(resultado_curated_risco_renovacao["arquivo_excecoes_renovacao"]),
+            "curated_reconciliation_report": str(resultado_reconciliacao["arquivo_relatorio"]),
+            "curated_exception_index": str(resultado_reconciliacao["arquivo_indice_excecoes"]),
             "stg_homologacoes_risco": str(resultado_staging_riscos["arquivo_staging"]),
             "stg_homologacoes_risco_invalidas": str(resultado_staging_riscos["arquivo_excecoes"]),
             "stg_contratos": str(resultado_staging_contratos["arquivo_staging"]),
@@ -255,6 +271,8 @@ def executar_pipeline(
             "fact_rfi_exceptions": resultado_curated_risco_renovacao["rfi_invalidos"],
             "fact_renewal": resultado_curated_risco_renovacao["renovacoes_publicadas"],
             "fact_renewal_exceptions": resultado_curated_risco_renovacao["renovacoes_invalidas"],
+            "curated_reconciliation_report": resultado_reconciliacao["manifesto"]["reconciliation_report_rows"],
+            "curated_exception_index": resultado_reconciliacao["manifesto"]["exception_index_rows"],
             "stg_homologacoes_risco_validas": resultado_staging_riscos["registros_validos"],
             "stg_homologacoes_risco_invalidas": resultado_staging_riscos["registros_invalidos"],
             "stg_contratos_validos": resultado_staging_contratos["registros_validos"],
@@ -276,6 +294,7 @@ def executar_pipeline(
             "compartilhadas": resultado_curated_compartilhadas["manifesto"],
             "contratos_gastos": resultado_curated_contratos_gastos["manifesto"],
             "risco_renovacao": resultado_curated_risco_renovacao["manifesto"],
+            "quality": resultado_reconciliacao["manifesto"],
         },
     }
     arquivo_manifesto = raw_dir / f"run_manifest_{identificador_lote}.json"
@@ -283,6 +302,11 @@ def executar_pipeline(
         json.dumps(manifesto, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     manifesto["arquivos"]["manifesto"] = str(arquivo_manifesto)
+    if not resultado_reconciliacao["quality_passed"]:
+        entidades = ", ".join(resultado_reconciliacao["entidades_reprovadas"])
+        raise reconciliacoes_curated.CuratedQualityError(
+            f"Quality gate reprovado para o lote {identificador_lote}: {entidades}."
+        )
     return manifesto
 
 

@@ -115,6 +115,7 @@ O GitHub Actions executa essas mesmas validações em pushes e pull requests par
 - Contratos vencidos conciliam gasto, valor total e saldo; contratos ativos podem ter pagamentos posteriores à data do snapshot.
 - A staging padroniza identificadores, tipos e metadados de carga, além de separar registros inválidos em uma saída de exceções. Consulte os [contratos técnicos de staging](docs/staging_contracts.md).
 - A camada curated publica dimensões de fornecedores, grupos econômicos, calendário, categorias e contratos, além dos fatos de pagamentos, risco e renovação. Consulte os [contratos técnicos curated](docs/curated_contracts.md).
+- O pipeline publica um relatório de reconciliação e um índice consolidado de exceções curated por lote. Consulte o [quality gate curated](docs/curated_quality.md).
 
 ## Próximos passos
 
