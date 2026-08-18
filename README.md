@@ -41,6 +41,8 @@ docs/          # Project Charter e documentação complementar
 | Dimensão de grupos econômicos | `dim_fornecedores.py` | `dim_economic_group_YYYYMMDD_HHMMSS.parquet` |
 | Dimensão de calendário | `dim_calendario_categoria.py` | `dim_calendar_YYYYMMDD_HHMMSS.parquet` |
 | Dimensão de categorias | `dim_calendario_categoria.py` | `dim_category_YYYYMMDD_HHMMSS.parquet` |
+| Dimensão de contratos | `dim_contratos_gastos.py` | `dim_contract_YYYYMMDD_HHMMSS.parquet` |
+| Fato de pagamentos | `dim_contratos_gastos.py` | `fact_spending_YYYYMMDD_HHMMSS.parquet` |
 
 Todos os dados são fictícios. Os arquivos CSV e Parquet gerados são ignorados pelo Git para que o repositório contenha código, testes e documentação.
 
@@ -64,6 +66,7 @@ python .\2.scr\2.etl\stg_pagamentos.py
 python .\2.scr\2.etl\stg_homologacoes_risco.py
 python .\2.scr\3.curated\dim_fornecedores.py
 python .\2.scr\3.curated\dim_calendario_categoria.py
+python .\2.scr\3.curated\dim_contratos_gastos.py
 ```
 
 Os geradores selecionam automaticamente a fonte versionada mais recente e preservam data e horário no nome dos arquivos. Execute-os na ordem acima para manter a coerência entre empresas, riscos, contratos, aditamentos e pagamentos.
@@ -108,7 +111,7 @@ O GitHub Actions executa essas mesmas validações em pushes e pull requests par
 - Aditamentos registram renovações e aportes separadamente.
 - Contratos vencidos conciliam gasto, valor total e saldo; contratos ativos podem ter pagamentos posteriores à data do snapshot.
 - A staging padroniza identificadores, tipos e metadados de carga, além de separar registros inválidos em uma saída de exceções. Consulte os [contratos técnicos de staging](docs/staging_contracts.md).
-- A camada curated publica dimensões de fornecedores, grupos econômicos, calendário e categorias a partir da staging válida. Consulte os [contratos técnicos curated](docs/curated_contracts.md).
+- A camada curated publica dimensões de fornecedores, grupos econômicos, calendário, categorias e contratos, além do fato de pagamentos. Consulte os [contratos técnicos curated](docs/curated_contracts.md).
 
 ## Próximos passos
 

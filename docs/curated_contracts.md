@@ -54,3 +54,29 @@ Grão: uma categoria técnica distinta de `contract_category` ou `payment_catego
 | `is_taxonomy_mapped` | Indica se a categoria foi classificada pela taxonomia conhecida. |
 
 Contratos e pagamentos que tenham o mesmo código técnico devem usar a mesma `category_key`. Categorias fora da taxonomia permanecem publicadas, mas recebem `nao_classificada` nos três níveis hierárquicos.
+
+## `dim_contract`
+
+Grão: um contrato resolvido por `contract_id` da `stg_contratos`.
+
+| Campo | Regra |
+|---|---|
+| `contract_key` | Chave substituta determinística: `CON-<contract_id>`. |
+| `supplier_key`, `economic_group_key`, `category_key` | Chaves obrigatórias das dimensões de referência. |
+| Chaves de vigência e risco | Referências a `dim_calendar`; a avaliação de risco pode ser nula. |
+| Valores contratuais | Valores original, total e saldo em precisão decimal. |
+
+Contratos sem fornecedor, categoria ou data resolvida são gravados em `dim_contract_resolution_exceptions_<lote>.parquet` e não integram a dimensão.
+
+## `fact_spending`
+
+Grão: um pagamento por `payment_id` da `stg_pagamentos`.
+
+| Campo | Regra |
+|---|---|
+| `spending_key` | Chave determinística: `SPN-<payment_id>`. |
+| `contract_key`, `supplier_key`, `economic_group_key`, `category_key` | Chaves obrigatórias e validadas contra o contrato e dimensões. |
+| `payment_calendar_key` | Referência obrigatória à data do pagamento. |
+| `cost_center`, `payment_value` | Dimensão degenerada e medida monetária decimal. |
+
+Pagamentos sem contrato publicado ou sem outra chave obrigatória são gravados em `fact_spending_exceptions_<lote>.parquet`, com `curated_validation_errors`. O manifesto reconcilia contagem e valor entre staging, fato e exceções.

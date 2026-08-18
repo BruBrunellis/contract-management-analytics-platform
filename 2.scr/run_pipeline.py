@@ -28,6 +28,7 @@ sys.path.insert(0, str(CURATED_SCRIPT_DIR))
 import company_generator
 import contract_generator
 import dim_calendario_categoria
+import dim_contratos_gastos
 import dim_fornecedores
 import risk_generator
 import spending_generator
@@ -185,6 +186,12 @@ def executar_pipeline(
         staging_dir,
         curated_dir,
     )
+    resultado_curated_contratos_gastos = dim_contratos_gastos.executar_publicacao(
+        identificador_lote,
+        staging_dir,
+        curated_dir,
+        curated_exceptions_dir,
+    )
 
     manifesto = {
         "identificador_lote": identificador_lote,
@@ -203,6 +210,10 @@ def executar_pipeline(
             "dim_supplier_resolution_exceptions": str(resultado_curated_fornecedores["arquivo_excecoes"]),
             "dim_calendar": str(resultado_curated_compartilhadas["arquivo_dim_calendar"]),
             "dim_category": str(resultado_curated_compartilhadas["arquivo_dim_category"]),
+            "dim_contract": str(resultado_curated_contratos_gastos["arquivo_dim_contract"]),
+            "fact_spending": str(resultado_curated_contratos_gastos["arquivo_fact_spending"]),
+            "dim_contract_resolution_exceptions": str(resultado_curated_contratos_gastos["arquivo_excecoes_contratos"]),
+            "fact_spending_exceptions": str(resultado_curated_contratos_gastos["arquivo_excecoes_pagamentos"]),
             "stg_homologacoes_risco": str(resultado_staging_riscos["arquivo_staging"]),
             "stg_homologacoes_risco_invalidas": str(resultado_staging_riscos["arquivo_excecoes"]),
             "stg_contratos": str(resultado_staging_contratos["arquivo_staging"]),
@@ -225,6 +236,10 @@ def executar_pipeline(
             "dim_supplier_resolution_exceptions": resultado_curated_fornecedores["registros_invalidos"],
             "dim_calendar": resultado_curated_compartilhadas["dias_publicados"],
             "dim_category": resultado_curated_compartilhadas["categorias_publicadas"],
+            "dim_contract": resultado_curated_contratos_gastos["contratos_publicados"],
+            "dim_contract_resolution_exceptions": resultado_curated_contratos_gastos["contratos_invalidos"],
+            "fact_spending": resultado_curated_contratos_gastos["pagamentos_publicados"],
+            "fact_spending_exceptions": resultado_curated_contratos_gastos["pagamentos_invalidos"],
             "stg_homologacoes_risco_validas": resultado_staging_riscos["registros_validos"],
             "stg_homologacoes_risco_invalidas": resultado_staging_riscos["registros_invalidos"],
             "stg_contratos_validos": resultado_staging_contratos["registros_validos"],
@@ -244,6 +259,7 @@ def executar_pipeline(
         "curated": {
             "fornecedores": resultado_curated_fornecedores["manifesto"],
             "compartilhadas": resultado_curated_compartilhadas["manifesto"],
+            "contratos_gastos": resultado_curated_contratos_gastos["manifesto"],
         },
     }
     arquivo_manifesto = raw_dir / f"run_manifest_{identificador_lote}.json"
