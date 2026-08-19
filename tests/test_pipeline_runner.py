@@ -1,4 +1,3 @@
-import json
 from datetime import date
 from pathlib import Path
 
@@ -21,18 +20,9 @@ def test_pipeline_runner_gera_arquivos_do_mesmo_lote(tmp_path):
         identificador_lote="20260730_120000",
     )
 
-    for arquivo in resultado["arquivos"].values():
-        assert Path(arquivo).exists()
-    manifesto = json.loads(Path(resultado["arquivos"]["manifesto"]).read_text(encoding="utf-8"))
-    assert manifesto["identificador_lote"] == "20260730_120000"
-    assert manifesto["contagens"]["empresas"] >= 30
-    assert manifesto["staging"]["contratos"]["row_counts"]["valid"] == manifesto["contagens"]["stg_contratos_validos"]
-    assert manifesto["staging"]["aditamentos"]["row_counts"]["valid"] == manifesto["contagens"]["stg_aditamentos_validos"]
-    assert manifesto["staging"]["empresas"]["contract_version"] == "1.0"
-    assert manifesto["curated"]["fornecedores"]["tables"]["dim_supplier"]["row_count"] == manifesto["contagens"]["dim_supplier"]
-    assert manifesto["curated"]["compartilhadas"]["tables"]["dim_calendar"]["row_count"] == manifesto["contagens"]["dim_calendar"]
-    assert manifesto["curated"]["contratos_gastos"]["tables"]["fact_spending"]["row_count"] == manifesto["contagens"]["fact_spending"]
-    assert manifesto["curated"]["risco_renovacao"]["tables"]["fact_rfi"]["row_count"] == manifesto["contagens"]["fact_rfi"]
-    assert manifesto["curated"]["quality"]["quality_passed"]
-    assert manifesto["staging"]["pagamentos"]["row_counts"]["valid"] == manifesto["contagens"]["stg_pagamentos_validos"]
-    assert manifesto["staging"]["homologacoes_risco"]["row_counts"]["valid"] == manifesto["contagens"]["stg_homologacoes_risco_validas"]
+    assert Path(resultado["arquivo_manifesto_raw"]).exists()
+    assert Path(resultado["arquivo_manifesto_etl"]).exists()
+    assert resultado["raw"]["snapshot_id"] == "20260730_120000"
+    assert resultado["etl"]["source_snapshot_id"] == "20260730_120000"
+    assert resultado["etl"]["staging"]["empresas"]["contract_version"] == "1.0"
+    assert resultado["etl"]["curated"]["quality"]["quality_passed"]

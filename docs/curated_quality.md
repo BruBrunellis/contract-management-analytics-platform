@@ -20,4 +20,4 @@ Os parâmetros pertencem ao `PipelineConfig` e podem ser definidos em arquivo JS
 | `min_curated_match_rate` | `0.95` | Percentual mínimo de registros publicados por entidade. |
 | `financial_reconciliation_tolerance` | `0.0` | Diferença financeira máxima tolerada em pagamentos e aditamentos. |
 
-A cobertura de origem precisa ser exata: cada registro staging deve ter sido publicado ou direcionado para exceção. O relatório e o manifesto são gravados antes de o pipeline lançar `CuratedQualityError` quando uma entidade não cumprir seus limiares.
+A cobertura de origem precisa ser exata: cada registro staging deve ter sido publicado ou direcionado para exceção. O relatório e o manifesto são gravados antes de o pipeline lançar `CuratedQualityError` quando uma entidade não cumprir seus limiares. Em execuções por manifesto RAW, o relatório também informa `source_snapshot_id` e `pipeline_run_id`.
