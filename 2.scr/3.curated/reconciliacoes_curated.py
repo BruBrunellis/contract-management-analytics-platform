@@ -292,12 +292,16 @@ def executar_reconciliacoes(
     exceptions_dir=EXCEPTIONS_DIR,
     min_match_rate=0.95,
     financial_tolerance=Decimal("0.00"),
+    pipeline_run_id=None,
 ):
     """Publica relatório e índice de exceções e devolve o resultado do quality gate."""
     limiares = QualityThresholds(float(min_match_rate), Decimal(str(financial_tolerance)))
     fontes = carregar_fontes(identificador_lote, staging_dir, curated_dir, exceptions_dir)
     relatorio = aplicar_limiares(construir_reconciliacoes(fontes), limiares)
     indice_excecoes = construir_indice_excecoes(fontes, identificador_lote)
+    relatorio.insert(0, "pipeline_run_id", pipeline_run_id or identificador_lote)
+    relatorio.insert(1, "source_snapshot_id", identificador_lote)
+    indice_excecoes.insert(1, "pipeline_run_id", pipeline_run_id or identificador_lote)
 
     curated_dir = Path(curated_dir)
     curated_dir.mkdir(parents=True, exist_ok=True)
@@ -313,6 +317,8 @@ def executar_reconciliacoes(
         "entidades_reprovadas": entidades_reprovadas,
         "manifesto": {
             "batch_id": identificador_lote,
+            "pipeline_run_id": pipeline_run_id or identificador_lote,
+            "source_snapshot_id": identificador_lote,
             "thresholds": {
                 "min_match_rate": limiares.min_match_rate,
                 "financial_tolerance": str(limiares.financial_tolerance),

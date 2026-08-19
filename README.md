@@ -76,21 +76,41 @@ Os geradores selecionam automaticamente a fonte versionada mais recente e preser
 
 ### Execução orquestrada
 
-Para gerar todas as fontes no mesmo lote, use o orquestrador:
+O fluxo recomendado separa a geração RAW da execução ETL. Primeiro, crie o snapshot
+inicial do cenário:
 
 ```powershell
-python .\2.scr\run_pipeline.py --interactive
+python .\2.scr\generate_raw.py `
+  --scenario-id cenario_001 `
+  --qtd-empresas 500 `
+  --seed 42 `
+  --data-referencia 2026-07-31
 ```
 
-Ou informe parâmetros sem interação:
+Em seguida, processe somente as fontes declaradas no manifesto criado:
 
 ```powershell
-python .\2.scr\run_pipeline.py --qtd-empresas 500 --seed 42 --data-referencia 2026-07-31
+python .\2.scr\run_etl.py `
+  --raw-manifest .\1.data\1.raw\cenario_001\<snapshot_id>\raw_manifest.json
 ```
 
-O pipeline grava um `run_manifest_YYYYMMDD_HHMMSS.json` com os parâmetros,
-arquivos produzidos e contagens de cada etapa. Um arquivo JSON também pode ser
-informado com `--config caminho\para\cenario.json` para repetir cenários.
+Para evoluir esse cenário para uma nova data sem alterar o snapshot anterior:
+
+```powershell
+python .\2.scr\update_raw.py `
+  --from-manifest .\1.data\1.raw\cenario_001\<snapshot_id>\raw_manifest.json `
+  --data-referencia 2026-09-30 `
+  --seed 99 `
+  --probabilidade-novos-fornecedores 0.10 `
+  --probabilidade-novos-contratos 0.50 `
+  --probabilidade-novos-pagamentos 0.75
+```
+
+Execute `run_etl.py` novamente com o manifesto retornado pela atualização. Cada
+processamento é gravado em diretórios próprios de staging e curated, e produz um
+`etl_manifest.json` com o `source_snapshot_id` e o `pipeline_run_id`. O
+`run_pipeline.py` continua disponível como atalho para gerar um cenário inicial e
+processá-lo em uma única execução. Consulte [snapshots RAW](docs/raw_snapshots.md).
 
 ## Qualidade e CI
 

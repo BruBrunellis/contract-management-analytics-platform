@@ -69,7 +69,8 @@ def quantidade_contratos(
 
 def faturamento_base_contrato(empresa, vigencia_inicio):
     """Retorna o faturamento do ano de início, limitado ao primeiro ano disponível."""
-    ano_base = max(vigencia_inicio.year, 2022)
+    anos_disponiveis = range(2022, 2027)
+    ano_base = min(max(vigencia_inicio.year, min(anos_disponiveis)), max(anos_disponiveis))
     return float(empresa[f"Faturamento_{ano_base}"]), ano_base
 
 
