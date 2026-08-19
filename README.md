@@ -112,6 +112,20 @@ processamento é gravado em diretórios próprios de staging e curated, e produz
 `run_pipeline.py` continua disponível como atalho para gerar um cenário inicial e
 processá-lo em uma única execução. Consulte [snapshots RAW](docs/raw_snapshots.md).
 
+### Camada analítica DuckDB
+
+Para publicar as views SQL sobre uma execução curated aprovada, informe o manifesto
+ETL correspondente:
+
+```powershell
+python .\2.scr\4.analytics\build_analytics.py `
+  --etl-manifest .\1.data\3.curated\<pipeline_run_id>\etl_manifest.json
+```
+
+O comando cria um banco local DuckDB por `pipeline_run_id`, com views de
+fornecedores, contratos, pagamentos, renovações e qualidade. Consulte os
+[contratos analíticos](docs/analytics_contracts.md).
+
 ## Qualidade e CI
 
 ```powershell
