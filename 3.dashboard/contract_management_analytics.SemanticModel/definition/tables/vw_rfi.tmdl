@@ -1,0 +1,198 @@
+table vw_rfi
+	lineageTag: 6dfa2a9e-5e64-4175-aeb7-82bd1a26144b
+
+	column rfi_key
+		dataType: string
+		lineageTag: c3cb3b62-56f8-4c62-b626-7a0724707cb5
+		summarizeBy: none
+		sourceColumn: rfi_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column risk_assessment_id
+		dataType: string
+		lineageTag: 53a2b3f0-f849-4c70-afed-2b849ba451a8
+		summarizeBy: none
+		sourceColumn: risk_assessment_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column assessment_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 046022b3-36e0-4a5e-bdc7-967d766e1f6c
+		summarizeBy: none
+		sourceColumn: assessment_date
+
+		variation Variation
+			isDefault
+			relationship: 87519bfa-3e62-4c3f-a80a-975c92faec18
+			defaultHierarchy: LocalDateTable_92558c68-d4fd-447a-bb28-7008698f1cc2.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column last_approval_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: cf371cd4-4be5-46ad-ae02-4eacdfb036a8
+		summarizeBy: none
+		sourceColumn: last_approval_date
+
+		variation Variation
+			isDefault
+			relationship: e4ab66d6-430e-4758-9248-9fb15a688e03
+			defaultHierarchy: LocalDateTable_9ba0385c-0cee-498b-b0d2-b38508dba44f.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column expiration_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 8acb3a61-7ccf-4192-ad1b-9e9a34da07a2
+		summarizeBy: none
+		sourceColumn: expiration_date
+
+		variation Variation
+			isDefault
+			relationship: 88eb87af-5ea9-48d5-aa36-5e9fdf72d4ef
+			defaultHierarchy: LocalDateTable_f8240c0b-b25e-4388-bae0-e1807cafee12.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column homologation_result
+		dataType: string
+		lineageTag: 21c9941a-9051-440f-bf99-65e4c4a5da97
+		summarizeBy: none
+		sourceColumn: homologation_result
+
+		annotation SummarizationSetBy = Automatic
+
+	column homologation_status
+		dataType: string
+		lineageTag: e4aaf3ac-ec13-45ef-a0ff-13b0a9740276
+		summarizeBy: none
+		sourceColumn: homologation_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column financial_risk
+		dataType: string
+		lineageTag: fa2f3f4d-539f-4a50-aa0b-35499e8ad77f
+		summarizeBy: none
+		sourceColumn: financial_risk
+
+		annotation SummarizationSetBy = Automatic
+
+	column labor_risk
+		dataType: string
+		lineageTag: ce68ead3-c362-4b3c-ba3f-aea064067bdf
+		summarizeBy: none
+		sourceColumn: labor_risk
+
+		annotation SummarizationSetBy = Automatic
+
+	column credit_rating
+		dataType: string
+		lineageTag: 97c9e073-d5c4-49d4-95fe-abfffe2be45f
+		summarizeBy: none
+		sourceColumn: credit_rating
+
+		annotation SummarizationSetBy = Automatic
+
+	column final_risk
+		dataType: string
+		lineageTag: 84992cda-9301-42d0-a138-160ab61f416c
+		summarizeBy: none
+		sourceColumn: final_risk
+
+		annotation SummarizationSetBy = Automatic
+
+	column interest_to_revenue_ratio
+		dataType: double
+		lineageTag: f3cc8ccb-63ea-46a9-a63c-d705f0f87669
+		summarizeBy: sum
+		sourceColumn: interest_to_revenue_ratio
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column revenue_trend
+		dataType: double
+		lineageTag: c788d267-3c37-450d-923a-6af8ac16a4fc
+		summarizeBy: sum
+		sourceColumn: revenue_trend
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column net_margin
+		dataType: double
+		lineageTag: fb09cf0e-41fb-4e01-9ee9-7286f8d2cd72
+		summarizeBy: sum
+		sourceColumn: net_margin
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column labor_cases_index
+		dataType: double
+		lineageTag: e6b4ccff-3aca-45aa-bf33-ad6f8b89ded2
+		summarizeBy: sum
+		sourceColumn: labor_cases_index
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column supplier_key
+		dataType: string
+		lineageTag: 298a4f7c-cd6d-4f29-b2d3-037da0441641
+		summarizeBy: none
+		sourceColumn: supplier_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier_cnpj
+		dataType: string
+		lineageTag: 8890b1b9-767d-4989-890f-65e46a125517
+		summarizeBy: none
+		sourceColumn: supplier_cnpj
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier_legal_name
+		dataType: string
+		lineageTag: 2870aa11-8f43-4db4-bffb-b4b78a1bc83d
+		summarizeBy: none
+		sourceColumn: supplier_legal_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column economic_group_key
+		dataType: string
+		lineageTag: 18aa36f3-c0fb-49c2-b56d-26ec3250cfa6
+		summarizeBy: none
+		sourceColumn: economic_group_key
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_rfi = m
+		mode: import
+		source =
+				let
+				    Source = Odbc.DataSource("dsn=Contract_analytics", [HierarchicalNavigation=true]),
+				    contract_analytics_Database = Source{[Name="contract_analytics",Kind="Database"]}[Data],
+				    main_Schema = contract_analytics_Database{[Name="main",Kind="Schema"]}[Data],
+				    vw_rfi_View = main_Schema{[Name="vw_rfi",Kind="View"]}[Data]
+				in
+				    vw_rfi_View
+

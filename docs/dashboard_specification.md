@@ -147,7 +147,7 @@ contratos com vencimento e exceções de qualidade.
 - Não empilhar faturamento, custo e lucro juntos: faturamento já contém os
   componentes. O visual financeiro empilha custo e lucro bruto.
 
-## Checklist de aceitação para a construção do `.pbix`
+## Checklist de aceitação para a construção do projeto Power BI
 
 1. A conexão ODBC aponta para um banco DuckDB criado por manifesto aprovado.
 2. O contexto da execução está visível no relatório.
@@ -160,9 +160,11 @@ contratos com vencimento e exceções de qualidade.
 7. Navegação, drill-through, títulos, unidades monetárias e estados de alerta
    funcionam em resolução de notebook.
 
-## Fora do escopo desta issue
+## Fora do escopo do dashboard MVP
 
-- Construção e versionamento do arquivo `.pbix`.
 - Publicação no Power BI Service, criação de embed público e licenciamento.
 - Gateway e atualização agendada.
 - Novas métricas, novos dados de escopo ou alterações adicionais no ETL.
+
+As consultas, medidas, instruções de atualização e checklist de validação que
+materializam esta especificação estão em [`3.dashboard`](../3.dashboard/README.md).

@@ -1,0 +1,70 @@
+table analytics_run_context
+	lineageTag: 0a49f875-6c95-4dc5-be0e-64a8a880a865
+
+	column pipeline_run_id
+		dataType: string
+		lineageTag: d3b53401-7f6d-4ce9-8fd7-575ba0c95d85
+		summarizeBy: none
+		sourceColumn: pipeline_run_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_snapshot_id
+		dataType: string
+		lineageTag: 98cdb97a-bee4-4ad4-bc54-22c9dc0c4ed8
+		summarizeBy: none
+		sourceColumn: source_snapshot_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column scenario_id
+		dataType: string
+		lineageTag: 0aaa5517-018f-4356-9281-fb9d289af55f
+		summarizeBy: none
+		sourceColumn: scenario_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column as_of_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 34791369-d377-4266-b239-4c31178ce943
+		summarizeBy: none
+		sourceColumn: as_of_date
+
+		variation Variation
+			isDefault
+			relationship: 262bce3b-9013-463d-b8ec-0ac03b77f554
+			defaultHierarchy: LocalDateTable_5cca1933-f5e4-489b-a63f-c057e3f1d894.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column etl_manifest_path
+		dataType: string
+		lineageTag: 75b17d6a-12ab-4c44-a9d9-2efd37a6783f
+		summarizeBy: none
+		sourceColumn: etl_manifest_path
+
+		annotation SummarizationSetBy = Automatic
+
+	column curated_dir
+		dataType: string
+		lineageTag: ef471919-fe10-4749-aa75-67509aa2388c
+		summarizeBy: none
+		sourceColumn: curated_dir
+
+		annotation SummarizationSetBy = Automatic
+
+	partition analytics_run_context = m
+		mode: import
+		source =
+				let
+				    Source = Odbc.DataSource("dsn=Contract_analytics", [HierarchicalNavigation=true]),
+				    contract_analytics_Database = Source{[Name="contract_analytics",Kind="Database"]}[Data],
+				    main_Schema = contract_analytics_Database{[Name="main",Kind="Schema"]}[Data],
+				    analytics_run_context_Table = main_Schema{[Name="analytics_run_context",Kind="Table"]}[Data]
+				in
+				    analytics_run_context_Table
+

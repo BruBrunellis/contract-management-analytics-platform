@@ -130,10 +130,12 @@ anuais. Consulte os [contratos analíticos](docs/analytics_contracts.md) e o
 
 ### Dashboard executivo
 
-O dashboard local será construído no Power BI Desktop a partir das views
-analíticas do DuckDB. A [especificação do dashboard](docs/dashboard_specification.md)
-define o contrato de consumo, as páginas centradas em categoria, os filtros e
-os critérios de validação antes da construção do arquivo `.pbix`.
+O dashboard local é criado no Power BI Desktop a partir das views analíticas do
+DuckDB. A [especificação do dashboard](docs/dashboard_specification.md) define
+o contrato de consumo, as páginas centradas em categoria, os filtros e os
+critérios de validação. O [pacote Power BI](3.dashboard/README.md) versiona as
+consultas, medidas, instruções de atualização e checklist de reconciliação para
+o projeto PBIP.
 
 ## Qualidade e CI
 
@@ -162,8 +164,8 @@ O GitHub Actions executa essas mesmas validações em pushes e pull requests par
 
 ## Próximos passos
 
-1. Construir dimensões e fatos na camada curated.
-2. Implementar reconciliações, métricas SQL e dashboard.
+1. Publicar o dashboard no Power BI Service e definir sua estratégia de acesso.
+2. Configurar gateway e atualização agendada quando houver uma fonte de dados persistente.
 3. Centralizar utilitários compartilhados de arquivos versionados e parâmetros de execução quando a estrutura de código migrar para um pacote `src/`.
 
 Consulte o [Project Charter](docs/Contract_Management_Analytics_Project_Charter.docx) para o planejamento detalhado.

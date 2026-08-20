@@ -1,0 +1,79 @@
+// Medidas DAX de apresentação. As colunas e fórmulas de negócio são fornecidas
+// pelas views DuckDB. Formate valores monetários como R$ e percentuais como %.
+
+Valor Contratado =
+SUM(vw_contracts[total_value])
+
+Saldo Contratual =
+SUM(vw_contracts[balance_value])
+
+Valor Consumido =
+[Valor Contratado] - [Saldo Contratual]
+
+Percentual de Consumo =
+DIVIDE([Valor Consumido], [Valor Contratado])
+
+Spending Total =
+SUM(vw_spending[payment_value])
+
+Quantidade de Contratos =
+DISTINCTCOUNT(vw_contracts[contract_key])
+
+Data de Referencia =
+MAX(analytics_run_context[as_of_date])
+
+Contratos Vencidos =
+VAR ReferenceDate = [Data de Referencia]
+RETURN
+    CALCULATE(
+        DISTINCTCOUNT(vw_contracts[contract_key]),
+        FILTER(vw_contracts, vw_contracts[validity_end_date] < ReferenceDate)
+    )
+
+Contratos Ate 30 Dias =
+VAR ReferenceDate = [Data de Referencia]
+RETURN
+    CALCULATE(
+        DISTINCTCOUNT(vw_contracts[contract_key]),
+        FILTER(
+            vw_contracts,
+            vw_contracts[validity_end_date] >= ReferenceDate
+                && vw_contracts[validity_end_date] <= ReferenceDate + 30
+        )
+    )
+
+Contratos Ate 90 Dias =
+VAR ReferenceDate = [Data de Referencia]
+RETURN
+    CALCULATE(
+        DISTINCTCOUNT(vw_contracts[contract_key]),
+        FILTER(
+            vw_contracts,
+            vw_contracts[validity_end_date] >= ReferenceDate
+                && vw_contracts[validity_end_date] <= ReferenceDate + 90
+        )
+    )
+
+Valor de Aportes =
+CALCULATE(
+    SUM(vw_renewals[amendment_value]),
+    vw_renewals[amendment_type] = "aporte"
+)
+
+Quantidade de Renovacoes =
+CALCULATE(
+    DISTINCTCOUNT(vw_renewals[amendment_id]),
+    vw_renewals[is_renewal] = TRUE()
+)
+
+Dependencia Financeira Media =
+AVERAGE(vw_supplier_financials[financial_dependency_ratio])
+
+Excecoes de Qualidade =
+COUNTROWS(vw_quality_exceptions)
+
+Entidades com Falha de Qualidade =
+CALCULATE(
+    DISTINCTCOUNT(vw_quality_reconciliation[entity]),
+    vw_quality_reconciliation[status] <> "approved"
+)

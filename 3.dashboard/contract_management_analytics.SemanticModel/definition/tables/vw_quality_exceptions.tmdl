@@ -1,0 +1,94 @@
+table vw_quality_exceptions
+	lineageTag: b5c7fab3-e449-4d67-bc96-2b629a7aa4e7
+
+	column pipeline_run_id
+		dataType: string
+		lineageTag: 2049789a-0fb5-41cb-a1bc-244525b8e975
+		summarizeBy: none
+		sourceColumn: pipeline_run_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_snapshot_id
+		dataType: string
+		lineageTag: 1ac70a3d-1e38-42ed-a02b-fd5425731493
+		summarizeBy: none
+		sourceColumn: source_snapshot_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column entity
+		dataType: string
+		lineageTag: b0628937-61f7-4363-8106-681e076b9bd0
+		summarizeBy: none
+		sourceColumn: entity
+
+		annotation SummarizationSetBy = Automatic
+
+	column business_key_type
+		dataType: string
+		lineageTag: ae1c84bc-e823-417d-b904-426dc05576c8
+		summarizeBy: none
+		sourceColumn: business_key_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column business_key
+		dataType: string
+		lineageTag: 5fde9e33-dc0e-4b76-8c8b-9598bb327890
+		summarizeBy: none
+		sourceColumn: business_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column exception_cause
+		dataType: string
+		lineageTag: 0bba7c2e-20e9-4977-8b6d-2a2f66106ef5
+		summarizeBy: none
+		sourceColumn: exception_cause
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_file
+		dataType: string
+		lineageTag: 3c908f2d-da40-4374-9b12-45c344b6e567
+		summarizeBy: none
+		sourceColumn: source_file
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_row_number
+		dataType: string
+		lineageTag: 6d7608b1-9870-4b4a-865e-c29903468be8
+		summarizeBy: none
+		sourceColumn: source_row_number
+
+		annotation SummarizationSetBy = Automatic
+
+	column load_date
+		dataType: string
+		lineageTag: 08a29758-2958-4536-93e4-8903278e8e26
+		summarizeBy: none
+		sourceColumn: load_date
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_batch_id
+		dataType: string
+		lineageTag: e5b55dca-2906-48cf-b63d-1b6b442685c1
+		summarizeBy: none
+		sourceColumn: source_batch_id
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_quality_exceptions = m
+		mode: import
+		source =
+				let
+				    Source = Odbc.DataSource("dsn=Contract_analytics", [HierarchicalNavigation=true]),
+				    contract_analytics_Database = Source{[Name="contract_analytics",Kind="Database"]}[Data],
+				    main_Schema = contract_analytics_Database{[Name="main",Kind="Schema"]}[Data],
+				    vw_quality_exceptions_View = main_Schema{[Name="vw_quality_exceptions",Kind="View"]}[Data]
+				in
+				    vw_quality_exceptions_View
+

@@ -1,0 +1,139 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 0,
+        "y": 0
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 1291.3389829597731,
+            "y": 341.05585367472349
+          },
+          "nodeIndex": "analytics_run_context",
+          "nodeLineageTag": "0a49f875-6c95-4dc5-be0e-64a8a880a865",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 723.33898295977315,
+            "y": 303.67952474863478
+          },
+          "nodeIndex": "vw_contracts",
+          "nodeLineageTag": "b4ededab-cf79-425c-aa54-1d582279d10a",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1525.3389829597731,
+            "y": 353.05585367472349
+          },
+          "nodeIndex": "vw_quality_exceptions",
+          "nodeLineageTag": "b5c7fab3-e449-4d67-bc96-2b629a7aa4e7",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1007.3389829597733,
+            "y": 303.05585367472349
+          },
+          "nodeIndex": "vw_quality_reconciliation",
+          "nodeLineageTag": "fde69bef-5819-43e4-bae3-a6aca3a70b8f",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 608.09368797534057,
+            "y": -50
+          },
+          "nodeIndex": "vw_renewals",
+          "nodeLineageTag": "047c873c-f6a6-4ab9-8df3-90a0eef0c9dc",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50.02816944679887,
+            "y": 553.92279453227843
+          },
+          "nodeIndex": "vw_rfi",
+          "nodeLineageTag": "6dfa2a9e-5e64-4175-aeb7-82bd1a26144b",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 580.90371114560867,
+            "y": 656.111707349447
+          },
+          "nodeIndex": "vw_spending",
+          "nodeLineageTag": "a83650ae-caf4-400a-bb6a-da3f0b62d06b",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": 91.605396553460992
+          },
+          "nodeIndex": "vw_supplier_financials",
+          "nodeLineageTag": "b01d09a1-fa40-430c-88ed-2658d7623f83",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 337.04686686605942,
+            "y": 303.69386531366155
+          },
+          "nodeIndex": "vw_suppliers",
+          "nodeLineageTag": "f59f0b71-ad40-42eb-b7ab-2a7a633df7d9",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "All tables",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "All tables",
+  "defaultDiagram": "All tables"
+}
