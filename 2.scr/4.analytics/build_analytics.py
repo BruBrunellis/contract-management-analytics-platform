@@ -18,7 +18,9 @@ VIEWS_ESPERADAS = {
     "vw_suppliers",
     "vw_contracts",
     "vw_spending",
+    "vw_rfi",
     "vw_renewals",
+    "vw_supplier_financials",
     "vw_quality_reconciliation",
     "vw_quality_exceptions",
 }

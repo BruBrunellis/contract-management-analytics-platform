@@ -12,6 +12,7 @@ CURATED_DIR = PROJECT_ROOT / "1.data" / "3.curated"
 EXCEPTIONS_DIR = CURATED_DIR / "exceptions"
 
 COLUNAS_LINHAGEM = ["source_file", "source_row_number", "load_date"]
+ANOS_FINANCEIROS = range(2022, 2027)
 MAPEAMENTOS_DIRETOS = [
     {
         "entity": "dim_supplier",
@@ -50,6 +51,14 @@ MAPEAMENTOS_DIRETOS = [
         "business_key": "amendment_id",
         "monetary_column": "amendment_value",
     },
+    {
+        "entity": "fact_supplier_financial",
+        "source": "stg_empresas_financial",
+        "target": "fact_supplier_financial",
+        "exceptions": "fact_supplier_financial_exceptions",
+        "business_key": "financial_snapshot_key",
+        "monetary_column": "gross_revenue",
+    },
 ]
 COLUNAS_STAGING = {
     "stg_empresas": ["cnpj"],
@@ -78,6 +87,7 @@ COLUNAS_CURATED = {
     "fact_spending": ["payment_id", "payment_value"],
     "fact_rfi": ["risk_assessment_id"],
     "fact_renewal": ["amendment_id", "amendment_value"],
+    "fact_supplier_financial": ["financial_snapshot_key", "gross_revenue"],
 }
 
 
@@ -107,10 +117,36 @@ def carregar_fontes(identificador_lote, staging_dir=STAGING_DIR, curated_dir=CUR
         fontes[tabela] = pd.read_parquet(localizar_arquivo(tabela, identificador_lote, staging_dir), columns=colunas)
     for tabela, colunas in COLUNAS_CURATED.items():
         fontes[tabela] = pd.read_parquet(localizar_arquivo(tabela, identificador_lote, curated_dir), columns=colunas)
+    empresas = pd.read_parquet(localizar_arquivo("stg_empresas", identificador_lote, staging_dir))
+    fontes["stg_empresas_financial"] = explodir_empresas_financeiro(empresas)
     for mapeamento in MAPEAMENTOS_DIRETOS:
         tabela = mapeamento["exceptions"]
         fontes[tabela] = pd.read_parquet(localizar_arquivo(tabela, identificador_lote, exceptions_dir))
     return fontes
+
+
+def explodir_empresas_financeiro(empresas):
+    """Produz a chave esperada da fato financeira para a reconciliação anual."""
+    colunas_requeridas = [f"faturamento_{ano}" for ano in ANOS_FINANCEIROS]
+    if not {"cnpj", *colunas_requeridas}.issubset(empresas.columns):
+        return pd.DataFrame(
+            {
+                "financial_snapshot_key": pd.Series(dtype="string"),
+                "gross_revenue": pd.Series(dtype="float64"),
+            }
+        )
+    periodos = []
+    for ano in ANOS_FINANCEIROS:
+        periodo = pd.DataFrame(
+            {
+                "financial_snapshot_key": (
+                    "FIN-" + empresas["cnpj"].astype("string") + f"-{ano}"
+                ),
+                "gross_revenue": pd.to_numeric(empresas[f"faturamento_{ano}"], errors="coerce"),
+            }
+        )
+        periodos.append(periodo)
+    return pd.concat(periodos, ignore_index=True)
 
 
 def total_monetario(valores):

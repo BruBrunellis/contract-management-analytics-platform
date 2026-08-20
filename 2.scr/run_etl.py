@@ -20,6 +20,7 @@ sys.path.insert(0, str(CURATED_SCRIPT_DIR))
 import dim_calendario_categoria
 import dim_contratos_gastos
 import dim_fornecedores
+import fact_fornecedor_financeiro
 import facts_risco_renovacao
 import reconciliacoes_curated
 import stg_aditamentos
@@ -94,6 +95,9 @@ def executar_etl(
         contratos["arquivo_staging"],
     )
     compartilhadas = dim_calendario_categoria.executar_publicacao(snapshot_id, staging_dir, curated_dir)
+    financeiro_fornecedores = fact_fornecedor_financeiro.executar_publicacao(
+        snapshot_id, staging_dir, curated_dir, curated_exceptions_dir
+    )
     contratos_gastos = dim_contratos_gastos.executar_publicacao(
         snapshot_id, staging_dir, curated_dir, curated_exceptions_dir
     )
@@ -117,6 +121,7 @@ def executar_etl(
         pagamentos,
         fornecedores,
         compartilhadas,
+        financeiro_fornecedores,
         contratos_gastos,
         risco_renovacao,
     ]:
@@ -138,6 +143,7 @@ def executar_etl(
         "curated": {
             "fornecedores": fornecedores["manifesto"],
             "compartilhadas": compartilhadas["manifesto"],
+            "financeiro_fornecedores": financeiro_fornecedores["manifesto"],
             "contratos_gastos": contratos_gastos["manifesto"],
             "risco_renovacao": risco_renovacao["manifesto"],
             "quality": qualidade["manifesto"],
