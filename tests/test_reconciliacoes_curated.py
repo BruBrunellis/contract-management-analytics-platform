@@ -106,12 +106,23 @@ def criar_artefatos(tmp_path):
         curated,
         "fact_renewal",
     )
+    escrever(
+        pd.DataFrame(
+            {
+                "financial_snapshot_key": pd.Series(dtype="string"),
+                "gross_revenue": pd.Series(dtype="float64"),
+            }
+        ),
+        curated,
+        "fact_supplier_financial",
+    )
     for tabela, chave, valor in [
         ("dim_supplier_resolution_exceptions", "cnpj", None),
         ("dim_contract_resolution_exceptions", "contract_id", None),
         ("fact_spending_exceptions", "payment_id", "payment_value"),
         ("fact_rfi_exceptions", "risk_assessment_id", None),
         ("fact_renewal_exceptions", "amendment_id", "amendment_value"),
+        ("fact_supplier_financial_exceptions", "financial_snapshot_key", "gross_revenue"),
     ]:
         colunas = {chave: pd.Series(dtype="string"), "curated_validation_errors": pd.Series(dtype="string")}
         if valor:
@@ -130,7 +141,7 @@ def test_reconciliacao_aprovada_publica_relatorio(tmp_path):
     relatorio = pd.read_parquet(resultado["arquivo_relatorio"])
 
     assert resultado["quality_passed"]
-    assert len(relatorio) == 8
+    assert len(relatorio) == 9
     assert relatorio["status"].eq("approved").all()
     assert relatorio.loc[relatorio["entity"].eq("fact_spending"), "source_monetary_total"].item() == "100.00"
 

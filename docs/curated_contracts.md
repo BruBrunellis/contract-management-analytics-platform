@@ -94,6 +94,21 @@ Grão: um evento de homologação e risco por `risk_assessment_id`.
 
 Eventos sem fornecedor ou data de avaliação resolvida são gravados em `fact_rfi_exceptions_<lote>.parquet`.
 
+## `fact_supplier_financial`
+
+Grão: um fornecedor legal por ano fiscal disponível na `stg_empresas`.
+
+| Campo | Regra |
+|---|---|
+| `financial_snapshot_key` | Chave determinística: `FIN-<cnpj>-<ano>`. |
+| `supplier_key`, `economic_group_key` | Referências obrigatórias à entidade legal e ao grupo econômico. |
+| `financial_period_calendar_key` | Referência ao encerramento do ano fiscal. |
+| Medidas financeiras | Faturamento, custos, folha, lucro bruto, juros da dívida e lucro líquido. |
+
+Cada combinação fornecedor-ano é publicada ou isolada em
+`fact_supplier_financial_exceptions_<lote>.parquet`. A fato não agrega matriz e
+filiais: suas medidas são analisadas no CNPJ legal de origem.
+
 ## `fact_renewal`
 
 Grão: um evento de aditamento por `amendment_id`, incluindo renovações e aportes.

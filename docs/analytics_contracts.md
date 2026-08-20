@@ -17,12 +17,18 @@ manifesto.
 | `vw_suppliers` | Fornecedor legal | `dim_supplier`, `dim_economic_group` |
 | `vw_contracts` | Contrato resolvido | `dim_contract` e dimensões relacionadas |
 | `vw_spending` | Pagamento | `fact_spending` e dimensões relacionadas |
+| `vw_rfi` | Avaliação de homologação e risco | `fact_rfi`, fornecedor e calendário |
 | `vw_renewals` | Aditamento | `fact_renewal` e dimensões relacionadas |
+| `vw_supplier_financials` | Fornecedor legal e ano fiscal | `fact_supplier_financial`, contratos e dimensões |
 | `vw_quality_reconciliation` | Controle por entidade | relatório de reconciliação curated |
 | `vw_quality_exceptions` | Exceção publicada | índice consolidado de exceções |
 
 As views de pagamentos e renovações fazem joins apenas com dimensões. Não há join
 direto entre fatos, preservando seus grãos independentes.
+
+As consultas de KPI ficam em `2.scr/4.analytics/kpis/` e são executadas sobre
+essas views. Consulte o [dicionário de métricas](metric_dictionary.md) para
+fórmulas, grão e tratamento de exceções.
 
 ## Execução
 

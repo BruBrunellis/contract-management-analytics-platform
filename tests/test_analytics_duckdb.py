@@ -50,13 +50,17 @@ def test_recria_views_duckdb_por_manifesto_etl(tmp_path):
     with duckdb.connect(str(arquivo_banco), read_only=True) as conexao:
         assert conexao.execute("SELECT COUNT(*) FROM vw_contracts").fetchone()[0] > 0
         assert conexao.execute("SELECT COUNT(*) FROM vw_spending").fetchone()[0] > 0
+        assert conexao.execute("SELECT COUNT(*) FROM vw_rfi").fetchone()[0] > 0
         assert conexao.execute("SELECT COUNT(*) FROM vw_renewals").fetchone()[0] >= 0
+        assert conexao.execute("SELECT COUNT(*) FROM vw_supplier_financials").fetchone()[0] > 0
         contexto = conexao.execute(
-            "SELECT pipeline_run_id, source_snapshot_id FROM analytics_run_context"
+            "SELECT pipeline_run_id, source_snapshot_id, as_of_date FROM analytics_run_context"
         ).fetchone()
-        assert contexto == ("etl_analytics_test", "20260730_120000")
+        assert contexto == ("etl_analytics_test", "20260730_120000", date(2026, 7, 30))
         colunas = conexao.execute("DESCRIBE vw_quality_reconciliation").fetchdf()["column_name"].tolist()
         assert {"pipeline_run_id", "source_snapshot_id", "match_rate", "status"}.issubset(colunas)
+        for arquivo_sql in sorted((SCRIPT_DIR / "4.analytics" / "kpis").glob("*.sql")):
+            assert conexao.execute(arquivo_sql.read_text(encoding="utf-8")).fetchall() is not None
 
 
 def test_rejeita_manifesto_com_quality_gate_reprovado(tmp_path):

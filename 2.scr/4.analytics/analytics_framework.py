@@ -13,7 +13,9 @@ ARTEFATOS_CURATED = {
     "dim_category": "dim_category_{snapshot_id}.parquet",
     "dim_contract": "dim_contract_{snapshot_id}.parquet",
     "fact_spending": "fact_spending_{snapshot_id}.parquet",
+    "fact_rfi": "fact_rfi_{snapshot_id}.parquet",
     "fact_renewal": "fact_renewal_{snapshot_id}.parquet",
+    "fact_supplier_financial": "fact_supplier_financial_{snapshot_id}.parquet",
     "quality_reconciliation": "curated_reconciliation_report_{snapshot_id}.parquet",
     "quality_exceptions": "curated_exception_index_{snapshot_id}.parquet",
 }
@@ -31,6 +33,7 @@ class AnalyticsInput:
     pipeline_run_id: str
     source_snapshot_id: str
     scenario_id: str
+    as_of_date: str
     curated_dir: Path
     artifacts: dict[str, Path]
 
@@ -39,7 +42,7 @@ def carregar_entrada(caminho_manifesto):
     """Valida o handoff ETL e resolve somente os Parquets curated declarados."""
     caminho_manifesto = Path(caminho_manifesto)
     dados = json.loads(caminho_manifesto.read_text(encoding="utf-8"))
-    campos = {"pipeline_run_id", "source_snapshot_id", "scenario_id", "directories", "curated"}
+    campos = {"pipeline_run_id", "source_snapshot_id", "scenario_id", "as_of_date", "directories", "curated"}
     ausentes = campos.difference(dados)
     if ausentes:
         raise AnalyticsContractError(f"Manifesto ETL sem campos obrigatórios: {', '.join(sorted(ausentes))}.")
@@ -61,6 +64,7 @@ def carregar_entrada(caminho_manifesto):
         pipeline_run_id=str(dados["pipeline_run_id"]),
         source_snapshot_id=snapshot_id,
         scenario_id=str(dados["scenario_id"]),
+        as_of_date=str(dados["as_of_date"]),
         curated_dir=curated_dir,
         artifacts=artifacts,
     )
@@ -90,22 +94,24 @@ def registrar_contexto(conexao, entrada):
     """Registra a linhagem do banco, sem misturá-la às views de negócio."""
     conexao.execute(
         """
-        CREATE TABLE IF NOT EXISTS analytics_run_context (
+        DROP TABLE IF EXISTS analytics_run_context;
+        CREATE TABLE analytics_run_context (
             pipeline_run_id VARCHAR PRIMARY KEY,
             source_snapshot_id VARCHAR NOT NULL,
             scenario_id VARCHAR NOT NULL,
+            as_of_date DATE NOT NULL,
             etl_manifest_path VARCHAR NOT NULL,
             curated_dir VARCHAR NOT NULL
         )
         """
     )
-    conexao.execute("DELETE FROM analytics_run_context")
     conexao.execute(
-        "INSERT INTO analytics_run_context VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO analytics_run_context VALUES (?, ?, ?, ?, ?, ?)",
         [
             entrada.pipeline_run_id,
             entrada.source_snapshot_id,
             entrada.scenario_id,
+            entrada.as_of_date,
             str(entrada.etl_manifest_path),
             str(entrada.curated_dir),
         ],

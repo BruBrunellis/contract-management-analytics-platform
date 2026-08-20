@@ -44,6 +44,7 @@ docs/          # Project Charter e documentação complementar
 | Dimensão de contratos | `dim_contratos_gastos.py` | `dim_contract_YYYYMMDD_HHMMSS.parquet` |
 | Fato de pagamentos | `dim_contratos_gastos.py` | `fact_spending_YYYYMMDD_HHMMSS.parquet` |
 | Fato de homologação e risco | `facts_risco_renovacao.py` | `fact_rfi_YYYYMMDD_HHMMSS.parquet` |
+| Fato financeiro de fornecedor | `fact_fornecedor_financeiro.py` | `fact_supplier_financial_YYYYMMDD_HHMMSS.parquet` |
 | Fato de renovação e aditamento | `facts_risco_renovacao.py` | `fact_renewal_YYYYMMDD_HHMMSS.parquet` |
 
 Todos os dados são fictícios. Os arquivos CSV e Parquet gerados são ignorados pelo Git para que o repositório contenha código, testes e documentação.
@@ -123,8 +124,9 @@ python .\2.scr\4.analytics\build_analytics.py `
 ```
 
 O comando cria um banco local DuckDB por `pipeline_run_id`, com views de
-fornecedores, contratos, pagamentos, renovações e qualidade. Consulte os
-[contratos analíticos](docs/analytics_contracts.md).
+fornecedores, contratos, pagamentos, risco, renovações, qualidade e finanças
+anuais. Consulte os [contratos analíticos](docs/analytics_contracts.md) e o
+[dicionário de métricas](docs/metric_dictionary.md).
 
 ## Qualidade e CI
 
