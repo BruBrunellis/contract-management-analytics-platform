@@ -59,6 +59,9 @@ def test_recria_views_duckdb_por_manifesto_etl(tmp_path):
         assert contexto == ("etl_analytics_test", "20260730_120000", date(2026, 7, 30))
         colunas = conexao.execute("DESCRIBE vw_quality_reconciliation").fetchdf()["column_name"].tolist()
         assert {"pipeline_run_id", "source_snapshot_id", "match_rate", "status"}.issubset(colunas)
+        for view in ["vw_contracts", "vw_spending", "vw_renewals"]:
+            colunas_categoria = conexao.execute(f"DESCRIBE {view}").fetchdf()["column_name"].tolist()
+            assert {"category_macro_group", "category_group", "category_family"}.issubset(colunas_categoria)
         for arquivo_sql in sorted((SCRIPT_DIR / "4.analytics" / "kpis").glob("*.sql")):
             assert conexao.execute(arquivo_sql.read_text(encoding="utf-8")).fetchall() is not None
 

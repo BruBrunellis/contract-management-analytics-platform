@@ -14,7 +14,9 @@ SELECT
     category.category_key,
     category.category_code,
     category.category_name,
-    category.category_macro_group
+    category.category_macro_group,
+    category.category_group,
+    category.category_family
 FROM src_fact_spending AS spending
 INNER JOIN src_dim_contract AS contract
     ON spending.contract_key = contract.contract_key
