@@ -26,6 +26,11 @@ manifesto.
 As views de pagamentos e renovações fazem joins apenas com dimensões. Não há join
 direto entre fatos, preservando seus grãos independentes.
 
+As views de contratos, pagamentos e renovações expõem a hierarquia completa de
+categoria (`category_macro_group`, `category_group`, `category_family` e
+`category_name`) para consumo direto do dashboard sem recorrer às views internas
+`src_*`.
+
 As consultas de KPI ficam em `2.scr/4.analytics/kpis/` e são executadas sobre
 essas views. Consulte o [dicionário de métricas](metric_dictionary.md) para
 fórmulas, grão e tratamento de exceções.

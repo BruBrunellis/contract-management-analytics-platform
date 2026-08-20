@@ -12,6 +12,10 @@ SELECT
     supplier.supplier_legal_name,
     category.category_key,
     category.category_code,
+    category.category_name,
+    category.category_macro_group,
+    category.category_group,
+    category.category_family,
     start_calendar.calendar_date AS validity_start_date,
     end_calendar.calendar_date AS validity_end_date
 FROM src_fact_renewal AS renewal

@@ -128,6 +128,13 @@ fornecedores, contratos, pagamentos, risco, renovações, qualidade e finanças
 anuais. Consulte os [contratos analíticos](docs/analytics_contracts.md) e o
 [dicionário de métricas](docs/metric_dictionary.md).
 
+### Dashboard executivo
+
+O dashboard local será construído no Power BI Desktop a partir das views
+analíticas do DuckDB. A [especificação do dashboard](docs/dashboard_specification.md)
+define o contrato de consumo, as páginas centradas em categoria, os filtros e
+os critérios de validação antes da construção do arquivo `.pbix`.
+
 ## Qualidade e CI
 
 ```powershell
