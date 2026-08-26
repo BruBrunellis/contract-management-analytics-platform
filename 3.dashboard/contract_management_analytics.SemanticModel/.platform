@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "contract_management_analytics"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "22cf73e6-619a-4add-b9c3-63dc74afc107"
+  }
+}

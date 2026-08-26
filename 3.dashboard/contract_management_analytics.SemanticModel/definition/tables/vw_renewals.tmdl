@@ -1,0 +1,176 @@
+table vw_renewals
+	lineageTag: 047c873c-f6a6-4ab9-8df3-90a0eef0c9dc
+
+	column renewal_key
+		dataType: string
+		lineageTag: 5ec4f70e-f9fe-4786-980a-3e2171dd0089
+		summarizeBy: none
+		sourceColumn: renewal_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column amendment_id
+		dataType: string
+		lineageTag: 2d12029f-83d8-4f2b-8b61-49f288004526
+		summarizeBy: none
+		sourceColumn: amendment_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column amendment_sequence
+		dataType: int64
+		formatString: 0
+		lineageTag: c2086b36-e1ea-488a-8439-88cffca520b8
+		summarizeBy: sum
+		sourceColumn: amendment_sequence
+
+		annotation SummarizationSetBy = Automatic
+
+	column amendment_type
+		dataType: string
+		lineageTag: ee83b40e-e95c-4797-9852-d35ae0446fc3
+		summarizeBy: none
+		sourceColumn: amendment_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column is_renewal
+		dataType: string
+		lineageTag: ddceea0e-0249-4229-93b3-87e47c922612
+		summarizeBy: none
+		sourceColumn: is_renewal
+
+		annotation SummarizationSetBy = Automatic
+
+	column amendment_value
+		dataType: double
+		lineageTag: 41d58371-b6a3-4c46-905e-87406624e892
+		summarizeBy: sum
+		sourceColumn: amendment_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column contract_key
+		dataType: string
+		lineageTag: 2183d9f2-8b92-46f5-a208-dc8c9ea8265a
+		summarizeBy: none
+		sourceColumn: contract_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column contract_id
+		dataType: string
+		lineageTag: 0f49462e-4ad3-41be-9103-03abfa61e32e
+		summarizeBy: none
+		sourceColumn: contract_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier_key
+		dataType: string
+		lineageTag: 4c38f19d-5aea-4b5a-a0eb-252d20fc0922
+		summarizeBy: none
+		sourceColumn: supplier_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier_legal_name
+		dataType: string
+		lineageTag: 38c458ab-c6ab-485f-a233-b4b5d19a0396
+		summarizeBy: none
+		sourceColumn: supplier_legal_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_key
+		dataType: string
+		lineageTag: bef1bebd-5e22-4c8a-8580-e1c2def886d6
+		summarizeBy: none
+		sourceColumn: category_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_code
+		dataType: string
+		lineageTag: 1611d881-6160-42fb-9580-e4cfbab629e2
+		summarizeBy: none
+		sourceColumn: category_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_name
+		dataType: string
+		lineageTag: ea27efdc-b3e2-44f4-b5c1-6faf0785baf3
+		summarizeBy: none
+		sourceColumn: category_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_macro_group
+		dataType: string
+		lineageTag: 14e89d03-3773-4976-bc8d-2d999ffe5da1
+		summarizeBy: none
+		sourceColumn: category_macro_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_group
+		dataType: string
+		lineageTag: 63080d58-17bf-420b-b456-05b7a250d766
+		summarizeBy: none
+		sourceColumn: category_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_family
+		dataType: string
+		lineageTag: a1273509-9c9b-4520-8b5e-95bbf3ec9ded
+		summarizeBy: none
+		sourceColumn: category_family
+
+		annotation SummarizationSetBy = Automatic
+
+	column validity_start_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: d484b3a0-0153-4e88-8d2c-a1d0b9d09b03
+		summarizeBy: none
+		sourceColumn: validity_start_date
+
+		variation Variation
+			isDefault
+			relationship: e4c7efc8-0de9-4e5b-ac6c-fc9b547feb6e
+			defaultHierarchy: LocalDateTable_e3531fa5-00e8-4e69-9ddb-a5888aa56b9b.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column validity_end_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: f63d115c-912e-4476-a28b-939114fd3590
+		summarizeBy: none
+		sourceColumn: validity_end_date
+
+		variation Variation
+			isDefault
+			relationship: 5e714862-c706-4f82-9b3f-8a766a547ece
+			defaultHierarchy: LocalDateTable_edf3fdc8-4bea-4032-897a-d11830f95ef7.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition vw_renewals = m
+		mode: import
+		source =
+				let
+				    Source = Odbc.DataSource("dsn=Contract_analytics", [HierarchicalNavigation=true]),
+				    contract_analytics_Database = Source{[Name="contract_analytics",Kind="Database"]}[Data],
+				    main_Schema = contract_analytics_Database{[Name="main",Kind="Schema"]}[Data],
+				    vw_renewals_View = main_Schema{[Name="vw_renewals",Kind="View"]}[Data]
+				in
+				    vw_renewals_View

@@ -1,0 +1,89 @@
+table dCalendar
+	lineageTag: e7090f8b-97ab-4639-803b-7507ffb0befb
+
+	column Date
+		formatString: General Date
+		lineageTag: efe594a3-6657-4431-8ecd-ac1f1d5a8943
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		variation Variation
+			isDefault
+			relationship: 1c07e875-072d-4788-a139-29be1b96f371
+			defaultHierarchy: LocalDateTable_58a220bf-fc6a-4177-ac69-f607a63b015e.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column Ano
+		formatString: 0
+		lineageTag: b2a3c3e7-f7ea-44ce-b2da-f7e88ad99dac
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Ano]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Trimestre
+		lineageTag: 3b5336c0-dee9-4da5-9c11-ef15c7afad75
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Trimestre]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Ano-Trimestre
+		lineageTag: af0de31e-37da-46de-8382-300c8f83b9e2
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Ano-Trimestre]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Ano-Mês
+		lineageTag: 5e265863-b995-48ea-9fd7-bd3087a5761b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Ano-Mês]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Mês
+		lineageTag: a29bf631-8a87-45ce-9327-39d818d53c92
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Mês]
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Número do Mês'
+		formatString: 0
+		lineageTag: ce584f30-703c-40b6-b256-5114a2915cf2
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Número do Mês]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dCalendar = calculated
+		mode: import
+		source =
+
+				VAR Datas =
+				    UNION(
+				        SELECTCOLUMNS(vw_contracts, "Data", vw_contracts[validity_start_date]),
+				        SELECTCOLUMNS(vw_renewals, "Data", vw_renewals[validity_start_date]),
+				        SELECTCOLUMNS(vw_spending, "Data", vw_spending[payment_date])
+				    )
+				RETURN
+				    ADDCOLUMNS(
+				        CALENDAR(MINX(Datas, [Data]), MAXX(Datas, [Data])),
+				        "Ano", YEAR([Date]),
+				        "Trimestre", "T" & QUARTER([Date]),
+				        "Ano-Trimestre", FORMAT([Date], "YYYY") & "-T" & QUARTER([Date]),
+				        "Ano-Mês", FORMAT([Date], "YYYY-MM"),
+				        "Mês", FORMAT([Date], "MMMM"),
+				        "Número do Mês", MONTH([Date])
+				    )
+
+	annotation PBI_Id = 0139426c5b7a4f478b7740e0ffd4c851

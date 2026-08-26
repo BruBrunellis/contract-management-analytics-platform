@@ -1,0 +1,155 @@
+table vw_quality_reconciliation
+	lineageTag: fde69bef-5819-43e4-bae3-a6aca3a70b8f
+
+	column pipeline_run_id
+		dataType: string
+		lineageTag: fd74f467-2235-4cbb-b347-3e6cda2e7303
+		summarizeBy: none
+		sourceColumn: pipeline_run_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_snapshot_id
+		dataType: string
+		lineageTag: 1b33105e-912e-4c8f-a017-07dc1a6d8bc8
+		summarizeBy: none
+		sourceColumn: source_snapshot_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column entity
+		dataType: string
+		lineageTag: 4298eeb1-3b84-485e-b5de-a68e4e92d321
+		summarizeBy: none
+		sourceColumn: entity
+
+		annotation SummarizationSetBy = Automatic
+
+	column reconciliation_type
+		dataType: string
+		lineageTag: f771fe10-d062-44af-ad5f-a3a643092faa
+		summarizeBy: none
+		sourceColumn: reconciliation_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_table
+		dataType: string
+		lineageTag: bd110e54-682e-4e42-a1c3-c94e2b087d55
+		summarizeBy: none
+		sourceColumn: source_table
+
+		annotation SummarizationSetBy = Automatic
+
+	column curated_table
+		dataType: string
+		lineageTag: 5ecf87ad-9e81-4712-9098-11464388b078
+		summarizeBy: none
+		sourceColumn: curated_table
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_row_count
+		dataType: int64
+		formatString: 0
+		lineageTag: cc720491-b8fd-46e4-8f96-4ecca66434ef
+		summarizeBy: sum
+		sourceColumn: source_row_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column published_row_count
+		dataType: int64
+		formatString: 0
+		lineageTag: c7c95622-276f-41be-87e8-306b9f7e5ba3
+		summarizeBy: sum
+		sourceColumn: published_row_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column exception_row_count
+		dataType: int64
+		formatString: 0
+		lineageTag: d0706184-66c6-4362-84af-e713c15cc00a
+		summarizeBy: sum
+		sourceColumn: exception_row_count
+
+		annotation SummarizationSetBy = Automatic
+
+	column match_rate
+		dataType: double
+		lineageTag: 45d01c42-4894-4a2c-b1b7-27c155228b48
+		summarizeBy: sum
+		sourceColumn: match_rate
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column row_count_delta
+		dataType: int64
+		formatString: 0
+		lineageTag: 2136a961-37fe-4e6a-8398-aff34cf697b3
+		summarizeBy: sum
+		sourceColumn: row_count_delta
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_monetary_total
+		dataType: string
+		lineageTag: 609effa3-1c62-4553-a0ad-9e15b0d19068
+		summarizeBy: none
+		sourceColumn: source_monetary_total
+
+		annotation SummarizationSetBy = Automatic
+
+	column curated_monetary_total
+		dataType: string
+		lineageTag: 79754e0c-faef-4c9a-8df5-4da4462fbd48
+		summarizeBy: none
+		sourceColumn: curated_monetary_total
+
+		annotation SummarizationSetBy = Automatic
+
+	column exception_monetary_total
+		dataType: string
+		lineageTag: de6fe2a5-f9c3-45ae-941d-52319cede77b
+		summarizeBy: none
+		sourceColumn: exception_monetary_total
+
+		annotation SummarizationSetBy = Automatic
+
+	column monetary_delta
+		dataType: string
+		lineageTag: 0616322d-87e1-44fa-acd2-f283f2709f1a
+		summarizeBy: none
+		sourceColumn: monetary_delta
+
+		annotation SummarizationSetBy = Automatic
+
+	column status
+		dataType: string
+		lineageTag: cc192b5e-355e-4cee-abf9-8fe0e607604b
+		summarizeBy: none
+		sourceColumn: status
+
+		annotation SummarizationSetBy = Automatic
+
+	column failure_reasons
+		dataType: string
+		lineageTag: db4783e0-8e64-4b04-94f8-e832276b2d4c
+		summarizeBy: none
+		sourceColumn: failure_reasons
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_quality_reconciliation = m
+		mode: import
+		source =
+				let
+				    Source = Odbc.DataSource("dsn=Contract_analytics", [HierarchicalNavigation=true]),
+				    contract_analytics_Database = Source{[Name="contract_analytics",Kind="Database"]}[Data],
+				    main_Schema = contract_analytics_Database{[Name="main",Kind="Schema"]}[Data],
+				    vw_quality_reconciliation_View = main_Schema{[Name="vw_quality_reconciliation",Kind="View"]}[Data]
+				in
+				    vw_quality_reconciliation_View

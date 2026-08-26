@@ -1,0 +1,211 @@
+table vw_contracts
+	lineageTag: b4ededab-cf79-425c-aa54-1d582279d10a
+
+	column contract_key
+		dataType: string
+		lineageTag: 9f185928-5bd7-429b-9a94-866983ed02e9
+		summarizeBy: none
+		sourceColumn: contract_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column contract_id
+		dataType: string
+		lineageTag: 5a89cf6a-393b-4d51-8717-6f8f9101ce48
+		summarizeBy: none
+		sourceColumn: contract_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column contract_name
+		dataType: string
+		lineageTag: 08d1df9f-8374-486f-b536-a536afa9a57a
+		summarizeBy: none
+		sourceColumn: contract_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column contract_type
+		dataType: string
+		lineageTag: dc3a2a92-6ce1-483d-9521-952ea89ce2f7
+		summarizeBy: none
+		sourceColumn: contract_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column contract_status
+		dataType: string
+		lineageTag: ba646d7a-d42e-4e95-8f77-c7b540d25701
+		summarizeBy: none
+		sourceColumn: contract_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column final_risk
+		dataType: string
+		lineageTag: cc4e737e-b8d7-437b-84d5-a13f1df4352e
+		summarizeBy: none
+		sourceColumn: final_risk
+
+		annotation SummarizationSetBy = Automatic
+
+	column original_value
+		dataType: double
+		lineageTag: ee60a85b-bd21-4523-a8c2-430c268d3d68
+		summarizeBy: sum
+		sourceColumn: original_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column total_value
+		dataType: double
+		lineageTag: 7fecd42c-ee6d-4a63-834e-00c2baf2f69c
+		summarizeBy: sum
+		sourceColumn: total_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column balance_value
+		dataType: double
+		lineageTag: 92302c22-3bf0-4a16-a853-b7e42b1d5486
+		summarizeBy: sum
+		sourceColumn: balance_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column supplier_key
+		dataType: string
+		lineageTag: ce9b1511-ebee-4630-b906-5e56c2ff516c
+		summarizeBy: none
+		sourceColumn: supplier_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier_legal_name
+		dataType: string
+		lineageTag: cc9e4fb5-b766-4532-81e6-8eeb09baba9b
+		summarizeBy: none
+		sourceColumn: supplier_legal_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column economic_group_key
+		dataType: string
+		lineageTag: cd4748dd-5f75-462c-bee2-de4d08b7e073
+		summarizeBy: none
+		sourceColumn: economic_group_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_key
+		dataType: string
+		lineageTag: dd93da2d-1032-4494-85ce-10ec80781bf5
+		summarizeBy: none
+		sourceColumn: category_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_code
+		dataType: string
+		lineageTag: 9eef0ccb-4d33-492b-974e-5bc42baa184e
+		summarizeBy: none
+		sourceColumn: category_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_name
+		dataType: string
+		lineageTag: 6a33b364-e4a6-414f-ac6b-ffcee673e863
+		summarizeBy: none
+		sourceColumn: category_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_macro_group
+		dataType: string
+		lineageTag: a2a1d67c-475b-49f4-bd0d-1193285d9e90
+		summarizeBy: none
+		sourceColumn: category_macro_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_group
+		dataType: string
+		lineageTag: 5e89ef43-6e3a-4ba1-970f-d714ba0b1736
+		summarizeBy: none
+		sourceColumn: category_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_family
+		dataType: string
+		lineageTag: 3c2ed68a-a5af-4250-8f22-397dd5ccd977
+		summarizeBy: none
+		sourceColumn: category_family
+
+		annotation SummarizationSetBy = Automatic
+
+	column validity_start_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 55d2bf69-7660-4a73-afe8-b526e240d9e1
+		summarizeBy: none
+		sourceColumn: validity_start_date
+
+		variation Variation
+			isDefault
+			relationship: 3fcbd6d8-5324-45db-9eaf-cd258602e6ce
+			defaultHierarchy: LocalDateTable_0ec674b1-d29c-4caa-8829-f7906788afe8.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column validity_end_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 4323ca33-a4d9-4e0a-94c1-b77e649602a6
+		summarizeBy: none
+		sourceColumn: validity_end_date
+
+		variation Variation
+			isDefault
+			relationship: 487e8f32-cfd5-43d6-a4ff-4a645eb27a19
+			defaultHierarchy: LocalDateTable_f425aebe-39e5-4450-a931-7b1a42ff4023.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column risk_evaluation_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 6822451a-414a-4511-9e39-2da71b294be4
+		summarizeBy: none
+		sourceColumn: risk_evaluation_date
+
+		variation Variation
+			isDefault
+			relationship: 243a5fd3-5f91-4488-91f5-9f93b24e13d0
+			defaultHierarchy: LocalDateTable_56003dfd-e7b9-4234-97a0-81f8975302c4.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	partition vw_contracts = m
+		mode: import
+		source =
+				let
+				    Source = Odbc.DataSource("dsn=Contract_analytics", [HierarchicalNavigation=true]),
+				    contract_analytics_Database = Source{[Name="contract_analytics",Kind="Database"]}[Data],
+				    main_Schema = contract_analytics_Database{[Name="main",Kind="Schema"]}[Data],
+				    vw_contracts_View = main_Schema{[Name="vw_contracts",Kind="View"]}[Data]
+				in
+				    vw_contracts_View

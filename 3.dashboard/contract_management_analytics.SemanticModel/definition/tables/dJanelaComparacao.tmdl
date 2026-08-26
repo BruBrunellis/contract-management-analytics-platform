@@ -1,0 +1,28 @@
+table dJanelaComparacao
+	lineageTag: 9c5e46b5-b356-4ee7-82e5-0674a3fce01c
+
+	column Meses
+		formatString: 0
+		lineageTag: b0d91a9b-2513-476b-bfe0-e0cc64c1740a
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Meses]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dJanelaComparacao = calculated
+		mode: import
+		source =
+
+				DATATABLE(
+				    "Meses", INTEGER,
+				    {
+				        { 6 },
+				        { 12 },
+				        { 24 },
+				        { 36 },
+				        { 48 }
+				    }
+				)
+
+	annotation PBI_Id = f6c444a43a0c40c8875d55df2383c720

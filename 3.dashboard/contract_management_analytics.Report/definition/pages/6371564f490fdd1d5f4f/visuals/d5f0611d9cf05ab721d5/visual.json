@@ -1,0 +1,53 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "d5f0611d9cf05ab721d5",
+  "position": {
+    "x": 40,
+    "y": 22,
+    "z": 10000,
+    "height": 98,
+    "width": 948,
+    "tabOrder": 3000
+  },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "Plataforma Analítica de Compras",
+                    "textStyle": {
+                      "fontWeight": "bold",
+                      "fontFamily": "Georgia",
+                      "fontSize": "36pt",
+                      "color": "#094780"
+                    }
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": ""
+                  }
+                ]
+              },
+              {
+                "textRuns": [
+                  {
+                    "value": ""
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

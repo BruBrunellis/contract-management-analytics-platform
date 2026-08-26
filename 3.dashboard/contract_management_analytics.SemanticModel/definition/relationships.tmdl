@@ -1,0 +1,107 @@
+relationship 3fcbd6d8-5324-45db-9eaf-cd258602e6ce
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_contracts.validity_start_date
+	toColumn: LocalDateTable_0ec674b1-d29c-4caa-8829-f7906788afe8.Date
+
+relationship 487e8f32-cfd5-43d6-a4ff-4a645eb27a19
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_contracts.validity_end_date
+	toColumn: LocalDateTable_f425aebe-39e5-4450-a931-7b1a42ff4023.Date
+
+relationship e4c7efc8-0de9-4e5b-ac6c-fc9b547feb6e
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_renewals.validity_start_date
+	toColumn: LocalDateTable_e3531fa5-00e8-4e69-9ddb-a5888aa56b9b.Date
+
+relationship 5e714862-c706-4f82-9b3f-8a766a547ece
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_renewals.validity_end_date
+	toColumn: LocalDateTable_edf3fdc8-4bea-4032-897a-d11830f95ef7.Date
+
+relationship 87519bfa-3e62-4c3f-a80a-975c92faec18
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_rfi.assessment_date
+	toColumn: LocalDateTable_92558c68-d4fd-447a-bb28-7008698f1cc2.Date
+
+relationship e4ab66d6-430e-4758-9248-9fb15a688e03
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_rfi.last_approval_date
+	toColumn: LocalDateTable_9ba0385c-0cee-498b-b0d2-b38508dba44f.Date
+
+relationship 88eb87af-5ea9-48d5-aa36-5e9fdf72d4ef
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_rfi.expiration_date
+	toColumn: LocalDateTable_f8240c0b-b25e-4388-bae0-e1807cafee12.Date
+
+relationship 1af6b2ad-c8aa-460d-9759-9bf15eb45680
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_supplier_financials.financial_period_end_date
+	toColumn: LocalDateTable_0c3f4cf3-2c21-45e0-87dc-a967bb84c021.Date
+
+relationship 262bce3b-9013-463d-b8ec-0ac03b77f554
+	joinOnDateBehavior: datePartOnly
+	fromColumn: analytics_run_context.as_of_date
+	toColumn: LocalDateTable_5cca1933-f5e4-489b-a63f-c057e3f1d894.Date
+
+relationship AutoDetected_c20cf58f-9220-45b2-a605-eb8a02bfefd9
+	fromColumn: vw_renewals.contract_key
+	toColumn: vw_contracts.contract_key
+
+relationship AutoDetected_efc553ab-0339-429e-bed4-732a5af05c98
+	fromColumn: vw_spending.contract_key
+	toColumn: vw_contracts.contract_key
+
+relationship AutoDetected_6318fa21-10fe-4f1c-a7ec-96fe2cf80701
+	fromColumn: vw_contracts.supplier_key
+	toColumn: dSupplier.supplier_key
+
+relationship AutoDetected_fb99164c-890e-4362-86f7-380e700d35e6
+	isActive: false
+	fromColumn: vw_renewals.supplier_key
+	toColumn: dSupplier.supplier_key
+
+relationship AutoDetected_91abea32-bb71-48c4-8055-2736daf234d5
+	fromColumn: vw_rfi.supplier_key
+	toColumn: dSupplier.supplier_key
+
+relationship AutoDetected_3e1bda9a-3886-4e9d-aad4-9b6a067383b3
+	isActive: false
+	fromColumn: vw_spending.supplier_key
+	toColumn: dSupplier.supplier_key
+
+relationship AutoDetected_cf9f8295-bc81-4ce3-879c-c07c05257607
+	fromColumn: vw_supplier_financials.supplier_key
+	toColumn: dSupplier.supplier_key
+
+relationship AutoDetected_a40a4f29-4fea-42ce-a917-211792844664
+	fromColumn: vw_quality_reconciliation.pipeline_run_id
+	toColumn: analytics_run_context.pipeline_run_id
+
+relationship AutoDetected_7e431503-6f12-4290-9e11-cfa73cbf2066
+	fromColumn: vw_contracts.category_key
+	toColumn: dCategory.category_key
+
+relationship AutoDetected_5e49d03c-7706-4609-8fbd-6ef70ed94205
+	isActive: false
+	fromColumn: vw_renewals.category_key
+	toColumn: dCategory.category_key
+
+relationship AutoDetected_e6cc293b-e513-45ec-90d0-0baf168a378b
+	isActive: false
+	fromColumn: vw_spending.category_key
+	toColumn: dCategory.category_key
+
+relationship 1c07e875-072d-4788-a139-29be1b96f371
+	joinOnDateBehavior: datePartOnly
+	fromColumn: dCalendar.Date
+	toColumn: LocalDateTable_58a220bf-fc6a-4177-ac69-f607a63b015e.Date
+
+relationship ff4288e8-929b-90b9-583f-132ba07163a2
+	fromColumn: vw_spending.payment_date
+	toColumn: dCalendar.Date
+
+relationship 243a5fd3-5f91-4488-91f5-9f93b24e13d0
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_contracts.risk_evaluation_date
+	toColumn: LocalDateTable_56003dfd-e7b9-4234-97a0-81f8975302c4.Date
+
