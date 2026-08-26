@@ -1,0 +1,421 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "a0f4c4726c1a45e6b108",
+  "position": {
+    "x": 454.22489854693021,
+    "y": 644.23929833747877,
+    "z": 20000,
+    "height": 396.31574813457257,
+    "width": 1436.8707946066238,
+    "tabOrder": 15000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "vw_contracts"
+                    }
+                  },
+                  "Property": "contract_id"
+                }
+              },
+              "queryRef": "vw_contracts.contract_id",
+              "nativeQueryRef": "Contrato",
+              "active": true
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "vw_contracts"
+                    }
+                  },
+                  "Property": "contract_name"
+                }
+              },
+              "queryRef": "vw_contracts.contract_name",
+              "nativeQueryRef": "Nome",
+              "active": true,
+              "displayName": "Nome"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "vw_contracts"
+                    }
+                  },
+                  "Property": "total_value"
+                }
+              },
+              "queryRef": "vw_contracts.total_value",
+              "nativeQueryRef": "Valor Total",
+              "active": true,
+              "displayName": "Valor Total"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics_run_context"
+                    }
+                  },
+                  "Property": "Percentual de Saldo por Contrato"
+                }
+              },
+              "queryRef": "analytics_run_context.Percentual de Saldo por Contrato",
+              "nativeQueryRef": "% Saldo",
+              "active": true,
+              "displayName": "% Saldo"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics_run_context"
+                    }
+                  },
+                  "Property": "Risco de Aporte"
+                }
+              },
+              "queryRef": "analytics_run_context.Risco de Aporte",
+              "nativeQueryRef": "Risco de Aporte",
+              "active": true
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dCategory"
+                    }
+                  },
+                  "Property": "category_name"
+                }
+              },
+              "queryRef": "dCategory.category_name",
+              "nativeQueryRef": "Categoria",
+              "active": true,
+              "displayName": "Categoria"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "vw_contracts"
+                    }
+                  },
+                  "Property": "validity_end_date"
+                }
+              },
+              "queryRef": "vw_contracts.validity_end_date",
+              "nativeQueryRef": "Vencimento",
+              "active": true,
+              "displayName": "Vencimento",
+              "format": "d"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "vw_contracts"
+                    }
+                  },
+                  "Property": "supplier_legal_name"
+                }
+              },
+              "queryRef": "vw_contracts.supplier_legal_name",
+              "nativeQueryRef": "Fornecedor",
+              "active": true,
+              "displayName": "Fornecedor"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "analytics_run_context"
+                  }
+                },
+                "Property": "Risco de Aporte"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ]
+      }
+    },
+    "objects": {
+      "values": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            }
+          }
+        },
+        {
+          "properties": {
+            "fontColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "Conditional": {
+                      "Cases": [
+                        {
+                          "Condition": {
+                            "Comparison": {
+                              "ComparisonKind": 0,
+                              "Left": {
+                                "Measure": {
+                                  "Expression": {
+                                    "SourceRef": {
+                                      "Entity": "analytics_run_context"
+                                    }
+                                  },
+                                  "Property": "Risco de Aporte"
+                                }
+                              },
+                              "Right": {
+                                "Literal": {
+                                  "Value": "'Baixo'"
+                                }
+                              }
+                            },
+                            "Annotations": {
+                              "PowerBI.SQExprEvaluationKind": 1,
+                              "PowerBI.SQExprTextOperatorOption": 2
+                            }
+                          },
+                          "Value": {
+                            "Literal": {
+                              "Value": "'#094780'"
+                            }
+                          }
+                        },
+                        {
+                          "Condition": {
+                            "Comparison": {
+                              "ComparisonKind": 0,
+                              "Left": {
+                                "Measure": {
+                                  "Expression": {
+                                    "SourceRef": {
+                                      "Entity": "analytics_run_context"
+                                    }
+                                  },
+                                  "Property": "Risco de Aporte"
+                                }
+                              },
+                              "Right": {
+                                "Literal": {
+                                  "Value": "'Médio'"
+                                }
+                              }
+                            },
+                            "Annotations": {
+                              "PowerBI.SQExprEvaluationKind": 1,
+                              "PowerBI.SQExprTextOperatorOption": 2
+                            }
+                          },
+                          "Value": {
+                            "Literal": {
+                              "Value": "'#C85827'"
+                            }
+                          }
+                        },
+                        {
+                          "Condition": {
+                            "Comparison": {
+                              "ComparisonKind": 0,
+                              "Left": {
+                                "Measure": {
+                                  "Expression": {
+                                    "SourceRef": {
+                                      "Entity": "analytics_run_context"
+                                    }
+                                  },
+                                  "Property": "Risco de Aporte"
+                                }
+                              },
+                              "Right": {
+                                "Literal": {
+                                  "Value": "'Alto'"
+                                }
+                              }
+                            },
+                            "Annotations": {
+                              "PowerBI.SQExprEvaluationKind": 1,
+                              "PowerBI.SQExprTextOperatorOption": 2
+                            }
+                          },
+                          "Value": {
+                            "Literal": {
+                              "Value": "'#B41825'"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "selector": {
+            "data": [
+              {
+                "dataViewWildcard": {
+                  "matchingOption": 1
+                }
+              }
+            ],
+            "metadata": "analytics_run_context.Risco de Aporte"
+          }
+        }
+      ],
+      "columnHeaders": [
+        {
+          "properties": {
+            "columnAdjustment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'growToFit'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "background": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "border": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "stylePreset": [
+        {
+          "properties": {
+            "name": {
+              "expr": {
+                "Literal": {
+                  "Value": "'BoldHeader'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "e42517076a294ffe6467",
+        "field": {
+          "Column": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "vw_contracts"
+              }
+            },
+            "Property": "contract_status"
+          }
+        },
+        "type": "Categorical",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "v",
+              "Entity": "vw_contracts",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "In": {
+                  "Expressions": [
+                    {
+                      "Column": {
+                        "Expression": {
+                          "SourceRef": {
+                            "Source": "v"
+                          }
+                        },
+                        "Property": "contract_status"
+                      }
+                    }
+                  ],
+                  "Values": [
+                    [
+                      {
+                        "Literal": {
+                          "Value": "'ativo'"
+                        }
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User"
+      }
+    ]
+  }
+}

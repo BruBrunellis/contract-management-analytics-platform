@@ -1,0 +1,1029 @@
+table analytics_run_context
+	lineageTag: 0a49f875-6c95-4dc5-be0e-64a8a880a865
+
+	measure 'Spending Total' = SUM(vw_spending[payment_value])
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: d95ee7b8-3b55-4a23-83cf-fd17556eecd4
+
+	measure 'Data de Corte' =
+
+			MAX(dCalendar[Date])
+		formatString: Short Date
+		lineageTag: 05609b81-649b-4f4b-85df-6a4deffa031d
+
+	measure 'Valor Original até o Corte' =
+
+			VAR Corte = [Data de Corte]
+			RETURN
+			    CALCULATE(
+			        SUM(vw_contracts[original_value]),
+			        FILTER(
+			            ALL(vw_contracts[validity_start_date]),
+			            vw_contracts[validity_start_date] <= Corte
+			        )
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 9e5b2360-e6b3-48cf-939f-ea26d47865e5
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	measure 'Valor de Renovações até o Corte' =
+
+			VAR Corte = [Data de Corte]
+			RETURN
+			    CALCULATE(
+			        SUM(vw_renewals[amendment_value]),
+			        vw_renewals[amendment_type] = "renovacao",
+			        FILTER(
+			            ALL(vw_renewals[validity_start_date]),
+			            vw_renewals[validity_start_date] <= Corte
+			        )
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 5f77de68-49b6-4560-adf4-2d547bab97e2
+
+	measure 'Valor de Aportes até o Corte' =
+
+			VAR Corte = [Data de Corte]
+			RETURN
+			    CALCULATE(
+			        SUM(vw_renewals[amendment_value]),
+			        vw_renewals[amendment_type] = "aporte",
+			        FILTER(
+			            ALL(vw_renewals[validity_start_date]),
+			            vw_renewals[validity_start_date] <= Corte
+			        )
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 91707835-b080-4294-84e3-94c7cf9a6502
+
+	measure 'Valor Contratado até o Corte' =
+
+			[Valor Original até o Corte]
+			    + [Valor de Renovações até o Corte]
+			    + [Valor de Aportes até o Corte]
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: d551342e-8b64-405d-9bfb-0e2a1a1e3b7d
+
+	measure 'Valor Consumido até o Corte' =
+
+			VAR Corte = [Data de Corte]
+			RETURN
+			    CALCULATE(
+			        SUM(vw_spending[payment_value]),
+			        FILTER(ALL(dCalendar), dCalendar[Date] <= Corte)
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 7fc07735-679a-4f44-9253-c33e85e6e407
+
+	measure 'Saldo Contratual no Corte' =
+
+			[Valor Contratado até o Corte] - [Valor Consumido até o Corte]
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 78f0e17d-9b41-427d-8cff-7e6a893a4708
+
+	measure 'Ano Selecionado' =
+
+			COALESCE(SELECTEDVALUE(dAno[Ano]), MAX(dCalendar[Ano]))
+		formatString: 0
+		lineageTag: 1839f9eb-130b-4de5-85f5-c8e55e32722d
+
+	measure 'Valor Original no Ano' =
+
+			VAR AnosSelecionados = VALUES(dAno[Ano])
+			RETURN
+			    CALCULATE(
+			        SUM(vw_contracts[original_value]),
+			        REMOVEFILTERS(dCalendar),
+			        FILTER(
+			            ALL(vw_contracts[validity_start_date]),
+			            YEAR(vw_contracts[validity_start_date]) IN AnosSelecionados
+			        )
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 9a0ed679-abf9-44e0-a07c-d283994421d3
+
+	measure 'Valor de Renovações no Ano' =
+
+			VAR AnosSelecionados = VALUES(dAno[Ano])
+			RETURN
+			    CALCULATE(
+			        SUM(vw_renewals[amendment_value]),
+			        REMOVEFILTERS(dCalendar),
+			        vw_renewals[amendment_type] = "renovacao",
+			        FILTER(
+			            ALL(vw_renewals[validity_start_date]),
+			            YEAR(vw_renewals[validity_start_date]) IN AnosSelecionados
+			        )
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 9dfa5c5e-d933-4fcc-bf95-7d10cea8b898
+
+	measure 'Valor de Aportes no Ano' =
+
+			VAR AnosSelecionados = VALUES(dAno[Ano])
+			RETURN
+			    CALCULATE(
+			        SUM(vw_renewals[amendment_value]),
+			        REMOVEFILTERS(dCalendar),
+			        vw_renewals[amendment_type] = "aporte",
+			        FILTER(
+			            ALL(vw_renewals[validity_start_date]),
+			            YEAR(vw_renewals[validity_start_date]) IN AnosSelecionados
+			        )
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 2e352174-a767-4be0-bfe5-dc744a178d32
+
+	measure 'Valor Contratado no Ano' =
+
+			[Valor Original no Ano]
+			    + [Valor de Renovações no Ano]
+			    + [Valor de Aportes no Ano]
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 53131b2e-7258-4d37-a885-8851db120a71
+
+	measure 'Valor Consumido no Ano' =
+
+			VAR AnosSelecionados = VALUES(dAno[Ano])
+			RETURN
+			    CALCULATE(
+			        SUM(vw_spending[payment_value]),
+			        REMOVEFILTERS(dCalendar),
+			        FILTER(
+			            ALL(vw_spending[payment_date]),
+			            YEAR(vw_spending[payment_date]) IN AnosSelecionados
+			        )
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 42bb8b2a-9e65-41f0-b357-ac4cd71963b2
+
+	measure 'Valor Contratado até Fim do Ano' =
+
+			VAR Corte = DATE([Ano Selecionado], 12, 31)
+			RETURN
+			    CALCULATE(
+			        SUM(vw_contracts[original_value]),
+			        REMOVEFILTERS(dCalendar),
+			        FILTER(ALL(vw_contracts[validity_start_date]), vw_contracts[validity_start_date] <= Corte)
+			    )
+			    + CALCULATE(
+			        SUM(vw_renewals[amendment_value]),
+			        REMOVEFILTERS(dCalendar),
+			        FILTER(ALL(vw_renewals[validity_start_date]), vw_renewals[validity_start_date] <= Corte)
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: d0006547-ac74-4af0-aa98-a08749f76a51
+
+	measure 'Valor Consumido até Fim do Ano' =
+
+			VAR Corte = DATE([Ano Selecionado], 12, 31)
+			RETURN
+			    CALCULATE(
+			        SUM(vw_spending[payment_value]),
+			        REMOVEFILTERS(dCalendar),
+			        FILTER(ALL(vw_spending[payment_date]), vw_spending[payment_date] <= Corte)
+			    )
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 163e6a44-1cb9-4b6e-a23f-7f70c05794e4
+
+	measure 'Saldo em 31 de Dezembro' =
+
+			[Valor Contratado até Fim do Ano] - [Valor Consumido até Fim do Ano]
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: e0fe7a11-5d0f-462e-a1f7-9d44e319d941
+
+	measure 'Variação Líquida no Ano' =
+
+			[Valor Contratado no Ano] - [Valor Consumido no Ano]
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 9178aea7-d981-4add-a7b1-3ce535ca6b5c
+
+	measure 'Valor Renovado até Fim do Ano' =
+
+			VAR Corte = DATE([Ano Selecionado], 12, 31)
+
+			VAR Renovacoes =
+			    CALCULATE(
+			        SUM(vw_renewals[amendment_value]),
+			        REMOVEFILTERS(dCalendar),
+			        vw_renewals[amendment_type] = "renovacao",
+			        vw_renewals[validity_start_date] <= Corte
+			    )
+
+			RETURN
+			    Renovacoes
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 24eb90f1-8c68-40f0-8e09-c3f3c4e3ce28
+
+	measure 'Valor Aportado até Fim do Ano' =
+
+			VAR Corte = DATE([Ano Selecionado], 12, 31)
+
+			VAR Renovacoes =
+			    CALCULATE(
+			        SUM(vw_renewals[amendment_value]),
+			        REMOVEFILTERS(dCalendar),
+			        vw_renewals[amendment_type] = "aporte",
+			        vw_renewals[validity_start_date] <= Corte
+			    )
+
+			RETURN
+			    Renovacoes
+		formatString: \$#,0.00;(\$#,0.00);\$#,0.00
+		lineageTag: 03414afa-04c8-4b18-a15a-5148a7ebf7c8
+
+	measure 'Ranking Fornecedor no Ano' =
+
+			RANKX(
+			    ALLSELECTED(dSupplier[supplier_legal_name]),
+			    [Valor Contratado no Ano],
+			    ,
+			    DESC,
+			    DENSE
+			)
+		formatString: 0
+		lineageTag: 38596629-4e12-4613-99a5-dea5a552b944
+
+	measure 'Exibir Top Fornecedores no Ano' =
+
+			IF(
+			    [Ranking Fornecedor no Ano]
+			        <= [Top Fornecedores Value],
+			    1
+			)
+		formatString: 0
+		lineageTag: 1cf7510c-ac82-478a-8913-64e3c52bc7ce
+
+	measure 'Valor Consumido (Label bn)' =
+
+			IF(
+			    ISBLANK([Valor Consumido no Ano]),
+			    BLANK(),
+			    "R$ " & FORMAT([Valor Consumido no Ano] / 1000000000, "#,##0.00") & "bn"
+			)
+		lineageTag: 8f1509d0-27b1-4bca-9be0-efb5a58eb4e8
+
+	measure 'Contratos Novos no Ano' =
+
+			VAR AnosSelecionados = VALUES(dAno[Ano])
+			RETURN
+			    CALCULATE(
+			        DISTINCTCOUNT(vw_contracts[contract_key]),
+			        REMOVEFILTERS(dCalendar),
+			        vw_contracts[contract_type] = "novo_contrato",
+			        FILTER(
+			            ALL(vw_contracts[validity_start_date]),
+			            YEAR(vw_contracts[validity_start_date]) IN AnosSelecionados
+			        )
+			    )
+		formatString: 0
+		lineageTag: d7d556ac-6e45-483b-a6f4-ad895eab3ab0
+
+	measure 'Contratos Ativos' =
+
+			CALCULATE(
+			    DISTINCTCOUNT(vw_contracts[contract_key]),
+			    REMOVEFILTERS(dCalendar),
+			    REMOVEFILTERS(vw_contracts[contract_status]),
+			    vw_contracts[contract_status] = "ativo"
+			)
+		formatString: 0
+		lineageTag: e4181f97-ac91-4075-a4ab-81f9d9956505
+
+	measure 'Contratos Vencidos' =
+
+			CALCULATE(
+			    DISTINCTCOUNT(vw_contracts[contract_key]),
+			    REMOVEFILTERS(dCalendar),
+			    REMOVEFILTERS(vw_contracts[contract_status]),
+			    vw_contracts[contract_status] = "vencido"
+			)
+		formatString: 0
+		lineageTag: df4b9bc3-314b-47c0-bcad-9ce4b369e07e
+
+	measure 'Vencimento Próximo (90 dias)' =
+
+			VAR Hoje = TODAY()
+			RETURN
+			    CALCULATE(
+			        DISTINCTCOUNT(vw_contracts[contract_key]),
+			        REMOVEFILTERS(dCalendar),
+			        REMOVEFILTERS(vw_contracts[contract_status]),
+			        vw_contracts[contract_status] = "ativo",
+			        FILTER(
+			            ALL(vw_contracts[validity_end_date]),
+			            vw_contracts[validity_end_date] >= Hoje
+			                && vw_contracts[validity_end_date] <= Hoje + 90
+			        )
+			    )
+		formatString: 0
+		lineageTag: 1c8219bb-0488-4650-94e9-f1897f2215dd
+
+	measure 'Contratos Renovados no Ano' =
+
+			VAR AnosSelecionados = VALUES(dAno[Ano])
+			RETURN
+			    CALCULATE(
+			        DISTINCTCOUNT(vw_renewals[contract_key]),
+			        REMOVEFILTERS(dCalendar),
+			        vw_renewals[amendment_type] = "renovacao",
+			        FILTER(
+			            ALL(vw_renewals[validity_start_date]),
+			            YEAR(vw_renewals[validity_start_date]) IN AnosSelecionados
+			        )
+			    )
+		formatString: 0
+		lineageTag: edc1df75-05c8-43b8-bd7f-73d5baf0e283
+
+	measure 'Contratos Encerrados no Ano' =
+
+			VAR AnosSelecionados = VALUES(dAno[Ano])
+			RETURN
+			    CALCULATE(
+			        DISTINCTCOUNT(vw_contracts[contract_key]),
+			        REMOVEFILTERS(dCalendar),
+			        REMOVEFILTERS(vw_contracts[contract_status]),
+			        vw_contracts[contract_status] = "encerrado",
+			        FILTER(
+			            ALL(vw_contracts[risk_evaluation_date]),
+			            YEAR(vw_contracts[risk_evaluation_date]) IN AnosSelecionados
+			        )
+			    )
+		formatString: 0
+		lineageTag: 8779276b-039e-41b5-9ba4-dc835ab789d3
+
+	measure 'Contratos Vencidos no Ano' =
+
+			VAR AnosSelecionados = VALUES(dAno[Ano])
+			RETURN
+			    CALCULATE(
+			        DISTINCTCOUNT(vw_contracts[contract_key]),
+			        REMOVEFILTERS(dCalendar),
+			        REMOVEFILTERS(vw_contracts[contract_status]),
+			        vw_contracts[contract_status] = "vencido",
+			        FILTER(
+			            ALL(vw_contracts[validity_end_date]),
+			            YEAR(vw_contracts[validity_end_date]) IN AnosSelecionados
+			        )
+			    )
+		formatString: 0
+		lineageTag: 933da537-5e5d-4384-81b0-9e8d7240c530
+
+	measure 'Contratos Encerrados' =
+
+			CALCULATE(
+			    DISTINCTCOUNT(vw_contracts[contract_key]),
+			    REMOVEFILTERS(dCalendar),
+			    REMOVEFILTERS(vw_contracts[contract_status]),
+			    vw_contracts[contract_status] = "encerrado"
+			)
+		formatString: 0
+		lineageTag: 3ab40dc4-51cf-4c0d-bf51-b92b31a47a48
+
+	measure 'Risco Final Ponderado' =
+
+			VAR SaldoExposto =
+			    SUMX(
+			        FILTER(vw_contracts, vw_contracts[balance_value] > 0),
+			        vw_contracts[balance_value]
+			    )
+			VAR SaldoPonderado =
+			    SUMX(
+			        FILTER(vw_contracts, vw_contracts[balance_value] > 0),
+			        vw_contracts[balance_value]
+			            * SWITCH(vw_contracts[final_risk], "alto", 1.0, "medio", 0.5, "baixo", 0.1)
+			    )
+			RETURN
+			    DIVIDE(SaldoPonderado, SaldoExposto)
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 7eef8d63-79c2-4425-b06a-fe67d97f650e
+
+	measure 'Contratos com Risco Alto' =
+
+			CALCULATE(
+			    DISTINCTCOUNT(vw_contracts[contract_key]),
+			    vw_contracts[final_risk] = "alto"
+			)
+		formatString: 0
+		lineageTag: 260ed7d8-fc7a-4696-8c95-c3a2ccda4bb4
+
+	measure 'Contratos com Risco Médio' =
+
+			CALCULATE(
+			    DISTINCTCOUNT(vw_contracts[contract_key]),
+			    vw_contracts[final_risk] = "medio"
+			)
+		formatString: 0
+		lineageTag: 16e31702-6f21-4749-ba4c-304e205caf20
+
+	measure 'Contratos com Risco Baixo' =
+
+			CALCULATE(
+			    DISTINCTCOUNT(vw_contracts[contract_key]),
+			    vw_contracts[final_risk] = "baixo"
+			)
+		formatString: 0
+		lineageTag: 9bec7f4a-9d5d-4878-9f38-4fd5dd90a136
+
+	measure 'Maior Risco por Categoria' =
+
+			VAR Categorias =
+			    SELECTCOLUMNS(
+			        ALLSELECTED(dCategory[category_key], dCategory[category_name]),
+			        "@Key", dCategory[category_key],
+			        "@Nome", dCategory[category_name]
+			    )
+			VAR RiscosPorCategoria =
+			    ADDCOLUMNS(
+			        Categorias,
+			        "@Risco",
+			            VAR CategoriaAtual = [@Key]
+			            RETURN
+			                CALCULATE(
+			                    [Risco Final Ponderado],
+			                    REMOVEFILTERS(dCategory),
+			                    dCategory[category_key] = CategoriaAtual
+			                )
+			    )
+			RETURN
+			    MAXX(RiscosPorCategoria, [@Risco])
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 50f96fdb-7e48-4db2-a099-3351eae322a8
+
+	measure 'Categoria com Maior Risco' =
+
+			VAR Categorias =
+			    SELECTCOLUMNS(
+			        ALLSELECTED(dCategory[category_key], dCategory[category_name]),
+			        "@Key", dCategory[category_key],
+			        "@Nome", dCategory[category_name]
+			    )
+			VAR RiscosPorCategoria =
+			    ADDCOLUMNS(
+			        Categorias,
+			        "@Risco",
+			            VAR CategoriaAtual = [@Key]
+			            RETURN
+			                CALCULATE(
+			                    [Risco Final Ponderado],
+			                    REMOVEFILTERS(dCategory),
+			                    dCategory[category_key] = CategoriaAtual
+			                )
+			    )
+			RETURN
+			    CONCATENATEX(
+			        TOPN(1, RiscosPorCategoria, [@Risco], DESC, [@Nome], ASC),
+			        [@Nome]
+			    )
+		lineageTag: 12d8f5a9-8dfa-4b6a-9aa5-b4a8c8e1e8f1
+
+	measure 'Categoria com Menor Risco' =
+
+			VAR Categorias =
+			    SELECTCOLUMNS(
+			        ALLSELECTED(dCategory[category_key], dCategory[category_name]),
+			        "@Key", dCategory[category_key],
+			        "@Nome", dCategory[category_name]
+			    )
+			VAR RiscosPorCategoria =
+			    ADDCOLUMNS(
+			        Categorias,
+			        "@Risco",
+			            VAR CategoriaAtual = [@Key]
+			            RETURN
+			                CALCULATE(
+			                    [Risco Final Ponderado],
+			                    REMOVEFILTERS(dCategory),
+			                    dCategory[category_key] = CategoriaAtual
+			                )
+			    )
+			RETURN
+			    CONCATENATEX(
+			        TOPN(1, RiscosPorCategoria, [@Risco], ASC, [@Nome], ASC),
+			        [@Nome]
+			    )
+		lineageTag: 1e74ec4b-d44e-4a72-902e-88abaf1becdf
+
+	measure 'Exibir Contrato Ativo' =
+
+			IF(MAX(vw_contracts[contract_status]) = "ativo", 1, 0)
+		formatString: 0
+		lineageTag: c2966ed1-800a-4c08-9c1e-4302a03184f2
+
+	measure 'Exibir Contrato de Risco Alto' =
+
+			IF(MAX(vw_contracts[final_risk]) = "alto", 1, 0)
+		formatString: 0
+		lineageTag: 41880b0a-a630-45a1-a40d-ea71dffef122
+
+	measure 'Exibir Contrato Próximo ao Vencimento' =
+
+			VAR Referencia = [Data de Referencia]
+			VAR Vencimento = MAX(vw_contracts[validity_end_date])
+			RETURN
+			    IF(
+			        MAX(vw_contracts[contract_status]) = "ativo"
+			            && Vencimento >= Referencia
+			            && Vencimento <= Referencia + 90,
+			        1,
+			        0
+			    )
+		lineageTag: cb5825eb-4de4-4d23-8a89-96702253ade2
+
+	measure 'Data de Referencia' =
+
+			MAX(analytics_run_context[as_of_date])
+		formatString: General Date
+		lineageTag: fa88f02d-411d-4383-9658-355b49f29abe
+
+	measure 'Percentual de Saldo por Contrato' =
+
+			DIVIDE(
+			    SUM(vw_contracts[balance_value]),
+			    SUM(vw_contracts[total_value])
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 97acecb4-4ece-4c68-aa45-939e5899367d
+
+	measure 'Variação % Valor Contratado por Categoria' =
+
+			VAR Atual = [Valor Contratado — Período Atual]
+			VAR Anterior = [Valor Contratado — Período Anterior]
+			RETURN
+			    IF(
+			        ISBLANK(Anterior) || Anterior = 0,
+			        BLANK(),
+			        DIVIDE(Atual - Anterior, Anterior)
+			    )
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 68b8cdff-8804-47d9-9914-4c14dca37943
+
+	measure 'Menor Risco por Categoria' =
+
+			VAR Categorias =
+			    SELECTCOLUMNS(
+			        ALLSELECTED(dCategory[category_key], dCategory[category_name]),
+			        "@Key", dCategory[category_key],
+			        "@Nome", dCategory[category_name]
+			    )
+			VAR RiscosPorCategoria =
+			    ADDCOLUMNS(
+			        Categorias,
+			        "@Risco",
+			            VAR CategoriaAtual = [@Key]
+			            RETURN
+			                CALCULATE(
+			                    [Risco Final Ponderado],
+			                    REMOVEFILTERS(dCategory),
+			                    dCategory[category_key] = CategoriaAtual
+			                )
+			    )
+			RETURN
+			    MINX(RiscosPorCategoria, [@Risco])
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 3bc7fe98-1314-43fe-9635-80e64c7760f3
+
+	measure 'Risco de Aporte' =
+
+			VAR Consumo =
+			    DIVIDE(
+			        SUM(vw_contracts[total_value]) - SUM(vw_contracts[balance_value]),
+			        SUM(vw_contracts[total_value])
+			    )
+			VAR Inicio =
+			    MIN(vw_contracts[validity_start_date])
+			VAR Fim =
+			    MAX(vw_contracts[validity_end_date])
+			VAR Referencia =
+			    MAX(analytics_run_context[as_of_date])
+			VAR VigenciaDecorrida =
+			    IF(
+			        ISBLANK(Inicio) || ISBLANK(Fim) || DATEDIFF(Inicio, Fim, DAY) <= 0,
+			        BLANK(),
+			        MIN(
+			            1,
+			            MAX(
+			                0,
+			                DIVIDE(
+			                    DATEDIFF(Inicio, Referencia, DAY),
+			                    DATEDIFF(Inicio, Fim, DAY)
+			                )
+			            )
+			        )
+			    )
+			VAR Desvio =
+			    Consumo - VigenciaDecorrida
+			RETURN
+			    SWITCH(
+			        TRUE(),
+			        ISBLANK(Consumo) || ISBLANK(VigenciaDecorrida), BLANK(),
+			        Desvio >= 0.20, "Alto",
+			        Desvio >= 0.05, "Médio",
+			        "Baixo"
+			    )
+		lineageTag: 82662488-5a70-4fbc-a7bf-784275f7c4e4
+
+	measure 'Janela Selecionada (Meses)' =
+
+			SELECTEDVALUE(dJanelaComparacao[Meses], 12)
+		formatString: 0
+		lineageTag: 00fea5ab-f1f1-4833-a7a5-0f6b8298c43f
+
+	measure 'Valor Contratado — Período Atual' =
+
+			VAR Meses = [Janela Selecionada (Meses)]
+			VAR Fim = MAX(analytics_run_context[as_of_date])
+			VAR Inicio = EDATE(Fim, -Meses) + 1
+			RETURN
+			    CALCULATE(
+			        SUM(vw_contracts[original_value]),
+			        REMOVEFILTERS(dCalendar),
+			        FILTER(
+			            ALL(vw_contracts[validity_start_date]),
+			            vw_contracts[validity_start_date] >= Inicio
+			                && vw_contracts[validity_start_date] <= Fim
+			        )
+			    )
+			    +
+			    CALCULATE(
+			        SUM(vw_renewals[amendment_value]),
+			        REMOVEFILTERS(dCalendar),
+			        FILTER(
+			            ALL(vw_renewals[validity_start_date]),
+			            vw_renewals[validity_start_date] >= Inicio
+			                && vw_renewals[validity_start_date] <= Fim
+			        )
+			    )
+		lineageTag: 3755eaf6-abf4-4124-8ff1-4a8cc1481bd5
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Valor Contratado — Período Anterior' =
+
+			VAR Meses = [Janela Selecionada (Meses)]
+			VAR FimAtual = MAX(analytics_run_context[as_of_date])
+			VAR FimAnterior = EDATE(FimAtual, -Meses)
+			VAR InicioAnterior = EDATE(FimAtual, -2 * Meses) + 1
+			RETURN
+			    CALCULATE(
+			        SUM(vw_contracts[original_value]),
+			        REMOVEFILTERS(dCalendar),
+			        FILTER(
+			            ALL(vw_contracts[validity_start_date]),
+			            vw_contracts[validity_start_date] >= InicioAnterior
+			                && vw_contracts[validity_start_date] <= FimAnterior
+			        )
+			    )
+			    +
+			    CALCULATE(
+			        SUM(vw_renewals[amendment_value]),
+			        REMOVEFILTERS(dCalendar),
+			        FILTER(
+			            ALL(vw_renewals[validity_start_date]),
+			            vw_renewals[validity_start_date] >= InicioAnterior
+			                && vw_renewals[validity_start_date] <= FimAnterior
+			        )
+			    )
+		lineageTag: 1e7aaadf-155e-45c1-9f4d-e28421b8f09c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Valor Anualizado de Contratos Ativos' =
+
+			VAR Referencia =
+			    MAX(analytics_run_context[as_of_date])
+			RETURN
+			    SUMX(
+			        FILTER(
+			            vw_contracts,
+			            vw_contracts[contract_status] = "ativo"
+			                && vw_contracts[validity_start_date] <= Referencia
+			                && vw_contracts[validity_end_date] >= Referencia
+			        ),
+			        DIVIDE(
+			            vw_contracts[total_value] * 365.25,
+			            DATEDIFF(
+			                vw_contracts[validity_start_date],
+			                vw_contracts[validity_end_date],
+			                DAY
+			            ) + 1
+			        )
+			    )
+		lineageTag: 7f4caaa1-b62a-4230-8846-fddedef475cd
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Valor Anualizado Ativo — Fornecedor' =
+
+			VAR Fornecedor =
+			    COALESCE(
+			        SELECTEDVALUE(dSupplier[supplier_key]),
+			        SELECTEDVALUE(vw_contracts[supplier_key])
+			    )
+			RETURN
+			    CALCULATE(
+			        [Valor Anualizado de Contratos Ativos],
+			        REMOVEFILTERS(vw_contracts),
+			        REMOVEFILTERS(dCategory),
+			        REMOVEFILTERS(dSupplier),
+			        dSupplier[supplier_key] = Fornecedor
+			    )
+		lineageTag: a4920801-111b-49fc-963c-02101d40092f
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Faturamento Mais Recente — Fornecedor' =
+
+			VAR Fornecedor =
+			    COALESCE(
+			        SELECTEDVALUE(dSupplier[supplier_key]),
+			        SELECTEDVALUE(vw_contracts[supplier_key])
+			    )
+			VAR DataMaisRecente =
+			    MAXX(
+			        FILTER(
+			            ALL(vw_supplier_financials),
+			            vw_supplier_financials[supplier_key] = Fornecedor
+			        ),
+			        vw_supplier_financials[financial_period_end_date]
+			    )
+			RETURN
+			    SUMX(
+			        FILTER(
+			            ALL(vw_supplier_financials),
+			            vw_supplier_financials[supplier_key] = Fornecedor
+			                && vw_supplier_financials[financial_period_end_date] = DataMaisRecente
+			        ),
+			        vw_supplier_financials[gross_revenue]
+			    )
+		lineageTag: 11052069-dc98-473b-8952-46ef9435cbe1
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Dependência Financeira — Fornecedor' =
+
+			DIVIDE(
+			    [Valor Anualizado Ativo — Fornecedor],
+			    [Faturamento Mais Recente — Fornecedor]
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: 0afeab6e-fa2a-451a-8a3b-d2c69d34d97b
+
+	measure 'Dependência Financeira Ponderada por Categoria' =
+
+			VAR ContratosValidos =
+			    FILTER(
+			        VALUES(vw_contracts[contract_key]),
+			        [Valor Anualizado de Contratos Ativos] > 0
+			            && NOT ISBLANK([Dependência Financeira — Fornecedor])
+			    )
+			RETURN
+			    DIVIDE(
+			        SUMX(
+			            ContratosValidos,
+			            [Dependência Financeira — Fornecedor]
+			                * [Valor Anualizado de Contratos Ativos]
+			        ),
+			        SUMX(
+			            ContratosValidos,
+			            [Valor Anualizado de Contratos Ativos]
+			        )
+			    )
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: ffecc1a9-4d3c-42e7-ad68-585dabfa92db
+
+	measure 'Valor Contratado — Últimos 12M' =
+
+			VAR Fim =
+			    MAX(analytics_run_context[as_of_date])
+			VAR Inicio =
+			    EDATE(Fim, -12) + 1
+			RETURN
+			    CALCULATE(
+			        SUM(vw_contracts[original_value]),
+			        REMOVEFILTERS(dCalendar),
+			        FILTER(
+			            ALL(vw_contracts[validity_start_date]),
+			            vw_contracts[validity_start_date] >= Inicio
+			                && vw_contracts[validity_start_date] <= Fim
+			        )
+			    )
+			    +
+			    CALCULATE(
+			        SUM(vw_renewals[amendment_value]),
+			        REMOVEFILTERS(dCalendar),
+			        FILTER(
+			            ALL(vw_renewals[validity_start_date]),
+			            vw_renewals[validity_start_date] >= Inicio
+			                && vw_renewals[validity_start_date] <= Fim
+			        )
+			    )
+		lineageTag: 349b8baa-5fd3-461b-ab63-38f6f757523e
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Status Homologação Atual' =
+
+			VAR Fornecedor =
+			    SELECTEDVALUE(dSupplier[supplier_key])
+			VAR UltimaAvaliacao =
+			    MAXX(
+			        FILTER(ALL(vw_rfi), vw_rfi[supplier_key] = Fornecedor),
+			        vw_rfi[assessment_date]
+			    )
+			RETURN
+			    MAXX(
+			        FILTER(
+			            ALL(vw_rfi),
+			            vw_rfi[supplier_key] = Fornecedor
+			                && vw_rfi[assessment_date] = UltimaAvaliacao
+			        ),
+			        vw_rfi[homologation_status]
+			    )
+		lineageTag: d36f1c4d-00c3-45bd-8764-64ea6eb77a3e
+
+	measure 'Risco Final Atual' =
+
+			VAR Fornecedor =
+			    SELECTEDVALUE(dSupplier[supplier_key])
+			VAR UltimaAvaliacao =
+			    MAXX(
+			        FILTER(ALL(vw_rfi), vw_rfi[supplier_key] = Fornecedor),
+			        vw_rfi[assessment_date]
+			    )
+			RETURN
+			    MAXX(
+			        FILTER(
+			            ALL(vw_rfi),
+			            vw_rfi[supplier_key] = Fornecedor
+			                && vw_rfi[assessment_date] = UltimaAvaliacao
+			        ),
+			        vw_rfi[final_risk]
+			    )
+		lineageTag: b7d0e769-8069-48b1-994f-ec732b454cf6
+
+	measure 'Valor Contratado 12M — Risco Alto' =
+
+			SUMX(
+			    FILTER(
+			        VALUES(dSupplier[supplier_key]),
+			        [Risco Final Atual] = "alto"
+			    ),
+			    [Valor Contratado — Últimos 12M]
+			)
+		lineageTag: 364ca9fd-2d0e-46b4-b485-d61aabe064fa
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure '% Exposição em Risco Alto' =
+
+			DIVIDE(
+			    [Valor Contratado 12M — Risco Alto],
+			    [Valor Contratado — Últimos 12M]
+			)
+		lineageTag: abbe7d27-cb71-4129-91b4-0cddc2a55c94
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Check Valor Ativo' =
+
+			VAR ValorAtivo = [Valor Anualizado Ativo — Fornecedor]
+			RETURN
+			    IF(
+			        NOT ISBLANK(ValorAtivo) && ValorAtivo > 0,
+			        1,
+			        0
+			    )
+		formatString: 0
+		lineageTag: 388d6a64-9cca-48ff-aad1-d1e97c4a5688
+
+	measure 'Cenários Financeiros' =
+
+			VAR Referencia =
+			    MAX(analytics_run_context[as_of_date])
+			RETURN
+			    CALCULATE(
+			        DISTINCTCOUNT(dSupplier[supplier_key]),
+			        REMOVEFILTERS(dCalendar),
+			        FILTER(
+			            VALUES(dSupplier[supplier_key]),
+			            CALCULATE(
+			                COUNTROWS(vw_contracts),
+			                REMOVEFILTERS(dCalendar),
+			                vw_contracts[contract_status] = "ativo",
+			                vw_contracts[validity_start_date] <= Referencia,
+			                vw_contracts[validity_end_date] >= Referencia
+			            ) > 0
+			        )
+			    )
+		formatString: 0
+		lineageTag: 7786f376-4210-4692-ab1e-57310ff18d9d
+
+	measure 'Faturamento — Fornecedores Ativos' =
+
+			CALCULATE(
+			    SUM(vw_supplier_financials[gross_revenue]),
+			    FILTER(
+			        VALUES(dSupplier[supplier_key]),
+			        [Valor Anualizado de Contratos Ativos] > 0
+			    )
+			)
+		lineageTag: 95f0722f-0ce9-491a-ae47-f717c43e09b3
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Custo — Fornecedores Ativos' =
+
+			CALCULATE(
+			    SUM(vw_supplier_financials[total_cost]),
+			    FILTER(
+			        VALUES(dSupplier[supplier_key]),
+			        [Valor Anualizado de Contratos Ativos] > 0
+			    )
+			)
+		lineageTag: 2f6a5999-a240-46bc-8da8-e2183359d10c
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Margem Líquida Ponderada — Fornecedores Ativos' =
+
+			DIVIDE(
+			    CALCULATE(
+			        SUM(vw_supplier_financials[net_income]),
+			        FILTER(
+			            VALUES(dSupplier[supplier_key]),
+			            [Valor Anualizado de Contratos Ativos] > 0
+			        )
+			    ),
+			    [Faturamento — Fornecedores Ativos]
+			)
+		formatString: 0.0%;-0.0%;0.0%
+		lineageTag: e20482b1-ace8-4a7b-8b1d-328785f8089b
+
+	column pipeline_run_id
+		dataType: string
+		lineageTag: d3b53401-7f6d-4ce9-8fd7-575ba0c95d85
+		summarizeBy: none
+		sourceColumn: pipeline_run_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_snapshot_id
+		dataType: string
+		lineageTag: 98cdb97a-bee4-4ad4-bc54-22c9dc0c4ed8
+		summarizeBy: none
+		sourceColumn: source_snapshot_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column scenario_id
+		dataType: string
+		lineageTag: 0aaa5517-018f-4356-9281-fb9d289af55f
+		summarizeBy: none
+		sourceColumn: scenario_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column as_of_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 34791369-d377-4266-b239-4c31178ce943
+		summarizeBy: none
+		sourceColumn: as_of_date
+
+		variation Variation
+			isDefault
+			relationship: 262bce3b-9013-463d-b8ec-0ac03b77f554
+			defaultHierarchy: LocalDateTable_5cca1933-f5e4-489b-a63f-c057e3f1d894.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column etl_manifest_path
+		dataType: string
+		lineageTag: 75b17d6a-12ab-4c44-a9d9-2efd37a6783f
+		summarizeBy: none
+		sourceColumn: etl_manifest_path
+
+		annotation SummarizationSetBy = Automatic
+
+	column curated_dir
+		dataType: string
+		lineageTag: ef471919-fe10-4749-aa75-67509aa2388c
+		summarizeBy: none
+		sourceColumn: curated_dir
+
+		annotation SummarizationSetBy = Automatic
+
+	partition analytics_run_context = m
+		mode: import
+		source =
+				let
+				    Source = Odbc.DataSource("dsn=Contract_analytics", [HierarchicalNavigation=true]),
+				    contract_analytics_Database = Source{[Name="contract_analytics",Kind="Database"]}[Data],
+				    main_Schema = contract_analytics_Database{[Name="main",Kind="Schema"]}[Data],
+				    analytics_run_context_Table = main_Schema{[Name="analytics_run_context",Kind="Table"]}[Data]
+				in
+				    analytics_run_context_Table

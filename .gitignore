@@ -19,3 +19,11 @@ htmlcov/
 # Relatórios e arquivos temporários
 *.log
 *.tmp
+
+# Estado local gerado pelo Power BI Project (PBIP)
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+**/.pbi/editorSettings.json
+
+# Backup local criado na recuperação da metadata Git
+/.git_backup_issue29_acl_recovery/

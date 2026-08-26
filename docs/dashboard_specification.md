@@ -62,9 +62,35 @@ dashboard.
 - Manter a hierarquia de filtro:
   `category_macro_group → category_group → category_family → category_name`.
 - Usar calendário local do Power BI somente para controlar eixos e seletores de
-  data. Regras de valor, saldo, risco e dependência permanecem no DuckDB/SQL.
+  data. A `dCalendar` filtra pagamentos e determina a data de corte dos cards
+  acumulados. A `dAno` é uma dimensão desconectada usada exclusivamente nos
+  cards anuais, para que a comparação de fluxo anual não altere a posição
+  acumulada selecionada no calendário.
 - Não criar relacionamento entre fatos. A agregação usa dimensões compartilhadas
   ou cada visual consulta sua view no próprio grão.
+
+### Perspectivas temporais dos cards
+
+- **Posição acumulada:** o segmentador `dCalendar[Date]` determina a data de
+  corte. Valor contratado reúne o valor original dos contratos e os
+  aditamentos com início até a data; valor consumido reúne pagamentos até a
+  mesma data; saldo é a diferença entre ambos.
+- **Visão do ano:** o segmentador desconectado `dAno[Ano]` apresenta somente os
+  contratos iniciados, renovações, aportes e pagamentos ocorridos no ano.
+  `Saldo em 31 de Dezembro` continua sendo uma posição acumulada até o último
+  dia do ano, e não a diferença dos fluxos daquele ano. A medida opcional
+  `Variação Líquida no Ano` expressa essa diferença de fluxos.
+- **Encerramentos no ano:** contratos encerrados são datados por
+  `vw_contracts[risk_evaluation_date]`, pois o cenário atual encerra contratos
+  a partir da avaliação de risco. A métrica não usa a vigência final planejada.
+- `analytics_run_context[as_of_date]` identifica a data do snapshot carregado;
+  não é o seletor da análise histórica.
+- **Comparação móvel por categoria:** a tabela desconectada
+  `dJanelaComparacao[Meses]` oferece 6, 12, 24, 36 e 48 meses. Ela compara a
+  janela encerrada na `as_of_date` com a janela imediatamente anterior de igual
+  duração, considerando valores originais, renovações e aportes. Sua interação
+  deve ser limitada ao grid de variação por categoria; `dAno` continua sendo o
+  seletor do restante do painel.
 
 `Escopo` neste dashboard significa a hierarquia de categoria. O nome do contrato
 é exibido como detalhe, mas não é uma dimensão formal de escopo.
@@ -81,11 +107,11 @@ As páginas de detalhe expõem filtros adicionais conforme o domínio: status
 contratual, tipo de contrato, tipo de aditamento, centro de custo, homologação,
 risco e ano financeiro.
 
-O menu principal terá as páginas **Visão da Categoria**, **Contratos e
-Renovações**, **Spending**, **Fornecedores e Risco** e **Qualidade**. O
-drill-through por `supplier_key` leva qualquer fornecedor à página de
-Fornecedores e Risco. A página inicial também terá links para detalhes de
-contratos com vencimento e exceções de qualidade.
+O menu principal terá as páginas **Visão de Categoria**, **Painel de
+Contratos**, **Painel de Spending** e **Painel de Fornecedores**. A página de
+fornecedores concentra a consulta operacional por CNPJ, sem drill-through
+obrigatório. Exceções de qualidade permanecem disponíveis nas views de
+qualidade e no checklist de validação.
 
 ## Páginas e visuais
 
@@ -93,7 +119,8 @@ contratos com vencimento e exceções de qualidade.
 
 | Visual | Métrica e fonte | Critério de validação |
 |---|---|---|
-| Cards de carteira | Valor contratado, saldo e consumo de `01_contract_balance_and_consumption.sql`. | Totais reconciliam com `vw_contracts` no mesmo filtro de categoria. |
+| Cards de carteira | Posição contratada, consumo acumulado e saldo na data de corte. | O contratado soma valores originais e eventos com início até o corte; o saldo é contratado menos pagamentos acumulados. |
+| Cards de visão anual | Contratado no ano, consumido no ano, saldo em 31 de dezembro e aportes no ano. | O filtro `dAno` não interfere na posição acumulada; o saldo anual é uma posição de fechamento. |
 | Card de spending | `SUM(payment_value)` em `vw_spending`. | Reconciliar com o total de `03_spending_concentration.sql`. |
 | Card de ação | Contratos vencidos ou dentro de 90 dias de `02_contract_expiry.sql`. | Contagem igual à consulta SQL na data de referência exibida. |
 | Principais contratos | Contratos por valor total/saldo de `vw_contracts`, com marcadores de renovação e aporte de `vw_renewals`. | Cada marcador corresponde a pelo menos um aditamento do tipo indicado para o mesmo `contract_key`. |
@@ -110,22 +137,34 @@ contratos com vencimento e exceções de qualidade.
 | Linha do tempo | Eventos de `vw_renewals` por vigência e tipo. | Cada evento corresponde a um `amendment_id` único. |
 | Tabela operacional | Contrato, fornecedor, categoria, saldo, risco, vigência e flags de renovação/aporte. | Sem duplicar contrato ao relacionar eventos; eventos são agregados por `contract_key`. |
 
+### Painel de Contratos
+
+| Visual | Métrica e fonte | Critério de validação |
+|---|---|---|
+| Contratos de risco alto | Detalhe de `vw_contracts` com `final_risk = alto`. | Cada linha possui risco alto e respeita os filtros de categoria e status. |
+| Vencimento próximo | Contratos ativos com vencimento entre a data de referência do snapshot e os 90 dias seguintes. | Igual ao critério de `02_contract_expiry.sql`. |
+| Concentração de risco | Risco final ponderado pelo saldo: alto = 100%, médio = 50%, baixo = 10%. | Denominador é a soma de `balance_value` positivo no filtro aplicado. |
+| Variação por categoria | Variação do valor contratado entre a janela móvel selecionada e a janela anterior de mesma duração. | Usa `dJanelaComparacao` (6, 12, 24, 36 ou 48 meses), com fim na `as_of_date`; não é afetada por `dAno`. |
+| Tracking de consumo | Percentual consumido, vigência decorrida e risco de aporte para contratos ativos. | Alto quando o consumo supera a vigência decorrida em 20 p.p.; médio a partir de 5 p.p. |
+
 ### Spending
 
 | Visual | Métrica e fonte | Critério de validação |
 |---|---|---|
-| Tendência mensal | `SUM(payment_value)` por mês em `vw_spending`. | Soma mensal igual ao total filtrado. |
-| Mix por escopo | Spending por hierarquia de `dCategory`. | A soma das partes equivale ao spending total. |
-| Concentração | Ranking e participação de `03_spending_concentration.sql`. | Participações somam 100% para o filtro aplicado. |
+| Botões de ano | Segmentador `dCalendar[Ano]` em modo Tile. Sem seleção, mostra todo o histórico; um ano selecionado filtra todos os visuais da página. | O total sem seleção é igual ao histórico completo; cada botão reconcilia com os pagamentos do respectivo ano. |
+| Card de spending selecionado | `SUM(payment_value)` em `vw_spending`. | Igual à soma dos pagamentos no contexto de ano aplicado. |
+| Tendência trimestral | `SUM(payment_value)` por `dCalendar[Ano-Trimestre]`. | Soma dos trimestres igual ao total filtrado. |
+| Mix por categoria | Spending por `vw_spending[category_name]`. | A soma das partes equivale ao spending total. |
 | Detalhe de pagamentos | Eventos de `vw_spending`. | Cada linha representa um `payment_id`. |
 
 ### Fornecedores e Risco
 
 | Visual | Métrica e fonte | Critério de validação |
 |---|---|---|
-| Homologação e risco | Avaliação mais recente de `04_supplier_homologation_risk.sql`. | Uma linha por fornecedor após o ranking da avaliação. |
-| Dependência financeira | Ranking de `05_supplier_financial_dependency.sql`. | Razões correspondem a `vw_supplier_financials`; denominador zero gera nulo. |
-| Perfil financeiro | Coluna empilhada de `total_cost + gross_profit`, linha de `net_income` e referência de faturamento. | Custo mais lucro bruto recompõe o faturamento em cada fornecedor-ano. |
+| Tabela de dependência | CNPJ, fornecedor, valor anualizado de contratos ativos, dependência financeira, último faturamento, homologação e risco final. | Uma linha por fornecedor com ao menos um contrato ativo na `as_of_date`; homologação e risco vêm da avaliação mais recente. |
+| Dependência por categoria | Média ponderada da dependência dos contratos ativos, usando o valor anualizado de cada contrato como peso. | Numerador é `dependência do fornecedor × valor anualizado`; denominador é a soma dos valores anualizados válidos. |
+| Cenários financeiros | Contagem distinta de fornecedores por `financial_scenario`. | Conta apenas fornecedores que tenham contrato ativo na `as_of_date`, respeitando os filtros de categoria. |
+| Saúde financeira histórica | Colunas de faturamento bruto e custo total, com linha de margem líquida ponderada. | O eixo é `financial_year`; a margem é `SUM(net_income) / SUM(gross_revenue)` da população de fornecedores ativos. |
 | Perfil do fornecedor | Identificação, grupo econômico, risco, gastos e contratos por `supplier_key`. | Não somar indicadores financeiros de matriz e filial. |
 
 ### Qualidade
@@ -147,7 +186,7 @@ contratos com vencimento e exceções de qualidade.
 - Não empilhar faturamento, custo e lucro juntos: faturamento já contém os
   componentes. O visual financeiro empilha custo e lucro bruto.
 
-## Checklist de aceitação para a construção do `.pbix`
+## Checklist de aceitação para a construção do projeto Power BI
 
 1. A conexão ODBC aponta para um banco DuckDB criado por manifesto aprovado.
 2. O contexto da execução está visível no relatório.
@@ -160,9 +199,11 @@ contratos com vencimento e exceções de qualidade.
 7. Navegação, drill-through, títulos, unidades monetárias e estados de alerta
    funcionam em resolução de notebook.
 
-## Fora do escopo desta issue
+## Fora do escopo do dashboard MVP
 
-- Construção e versionamento do arquivo `.pbix`.
 - Publicação no Power BI Service, criação de embed público e licenciamento.
 - Gateway e atualização agendada.
 - Novas métricas, novos dados de escopo ou alterações adicionais no ETL.
+
+As consultas, medidas, instruções de atualização e checklist de validação que
+materializam esta especificação estão em [`3.dashboard`](../3.dashboard/README.md).

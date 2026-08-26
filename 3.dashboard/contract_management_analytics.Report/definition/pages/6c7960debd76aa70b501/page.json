@@ -1,0 +1,25 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "6c7960debd76aa70b501",
+  "displayName": "Painel de Contratos",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920,
+  "pageBinding": {
+    "name": "bbfd429fb4ee42b22a23",
+    "type": "Default",
+    "parameters": []
+  },
+  "visualInteractions": [
+    {
+      "source": "fcffcde07c3a7075b91a",
+      "target": "60d068679e59c216ef4d",
+      "type": "DataFilter"
+    },
+    {
+      "source": "dd422cffc08ed4e442ab",
+      "target": "88003a6128589c0e737f",
+      "type": "DataFilter"
+    }
+  ]
+}

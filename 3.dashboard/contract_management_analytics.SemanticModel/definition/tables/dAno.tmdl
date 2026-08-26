@@ -1,0 +1,17 @@
+table dAno
+	lineageTag: 8f451aab-c0c2-4a8d-8062-b6d5964261f7
+
+	column Ano
+		formatString: 0
+		lineageTag: cd1841b3-7148-439f-b6e1-4633a30184b9
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Ano]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dAno = calculated
+		mode: import
+		source = DISTINCT(SELECTCOLUMNS(dCalendar, "Ano", dCalendar[Ano]))
+
+	annotation PBI_Id = 4b3f8761a4f640789d3eac5f64417df1

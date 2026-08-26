@@ -1,0 +1,206 @@
+table vw_supplier_financials
+	lineageTag: b01d09a1-fa40-430c-88ed-2658d7623f83
+
+	column financial_snapshot_key
+		dataType: string
+		lineageTag: b42fbb9e-12a4-4aff-972e-0ba02b5f6d50
+		summarizeBy: none
+		sourceColumn: financial_snapshot_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column financial_year
+		dataType: int64
+		formatString: 0
+		lineageTag: 089f76f1-5f8e-40ea-a323-00afd999929c
+		summarizeBy: sum
+		sourceColumn: financial_year
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column financial_period_end_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: e2decdd4-d7c6-4500-a62b-fca56251ca21
+		summarizeBy: none
+		sourceColumn: financial_period_end_date
+
+		variation Variation
+			isDefault
+			relationship: 1af6b2ad-c8aa-460d-9759-9bf15eb45680
+			defaultHierarchy: LocalDateTable_0c3f4cf3-2c21-45e0-87dc-a967bb84c021.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column gross_revenue
+		dataType: double
+		lineageTag: 25a3cd4d-d203-4f5e-9264-54d90aeb1649
+		summarizeBy: sum
+		sourceColumn: gross_revenue
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column total_cost
+		dataType: double
+		lineageTag: eee8c268-19d3-49cb-b2e3-f3eaf1a7d165
+		summarizeBy: sum
+		sourceColumn: total_cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column payroll_cost
+		dataType: double
+		lineageTag: 8a80d83f-d204-4c2c-a200-0705ecde177e
+		summarizeBy: sum
+		sourceColumn: payroll_cost
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column gross_profit
+		dataType: double
+		lineageTag: 72a817b3-6dac-4244-b60a-8463b06a853e
+		summarizeBy: sum
+		sourceColumn: gross_profit
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column debt_interest
+		dataType: double
+		lineageTag: b255e437-3d97-4792-b8fc-94f629829b47
+		summarizeBy: sum
+		sourceColumn: debt_interest
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column net_income
+		dataType: double
+		lineageTag: 0eff3cf9-cc6b-4261-b34c-17f1e0447fa6
+		summarizeBy: sum
+		sourceColumn: net_income
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column gross_margin
+		dataType: double
+		lineageTag: 521961a8-378c-4c41-8b9a-e0c1a782e740
+		summarizeBy: sum
+		sourceColumn: gross_margin
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column net_margin
+		dataType: double
+		lineageTag: 64cee80f-feb0-4821-a5aa-4a810ef8a6bb
+		summarizeBy: sum
+		sourceColumn: net_margin
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column annualized_contract_value
+		dataType: double
+		lineageTag: dd721458-56ea-41a8-b0e9-5ffc6a8ea131
+		summarizeBy: sum
+		sourceColumn: annualized_contract_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column financial_dependency_ratio
+		dataType: double
+		lineageTag: f76c3756-76d3-4709-aed7-ac36273ec4bd
+		summarizeBy: sum
+		sourceColumn: financial_dependency_ratio
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column revenue_to_contract_coverage_ratio
+		dataType: double
+		lineageTag: 628bf5dc-0548-486c-bbfb-32fab2092b28
+		summarizeBy: sum
+		sourceColumn: revenue_to_contract_coverage_ratio
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column supplier_key
+		dataType: string
+		lineageTag: 2338d9e7-6b7c-4dcd-91a8-28c1f79d9539
+		summarizeBy: none
+		sourceColumn: supplier_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier_cnpj
+		dataType: string
+		lineageTag: 84053753-dd94-4f7e-a9f9-4906d1054949
+		summarizeBy: none
+		sourceColumn: supplier_cnpj
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier_legal_name
+		dataType: string
+		lineageTag: b0610539-d42f-4dfc-a15a-d7a9ae3ccc07
+		summarizeBy: none
+		sourceColumn: supplier_legal_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier_hierarchy
+		dataType: string
+		lineageTag: 0abad893-05f2-4dbd-a986-25cedcc84c3f
+		summarizeBy: none
+		sourceColumn: supplier_hierarchy
+
+		annotation SummarizationSetBy = Automatic
+
+	column economic_group_key
+		dataType: string
+		lineageTag: 2afd677b-6f87-43a9-85c3-1deb5f589a43
+		summarizeBy: none
+		sourceColumn: economic_group_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column economic_group_legal_name
+		dataType: string
+		lineageTag: 4d128d9b-0b65-42ba-bf76-765ccc2b80c2
+		summarizeBy: none
+		sourceColumn: economic_group_legal_name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_supplier_financials = m
+		mode: import
+		source =
+				let
+				    Source = Odbc.DataSource("dsn=Contract_analytics", [HierarchicalNavigation=true]),
+				    contract_analytics_Database = Source{[Name="contract_analytics",Kind="Database"]}[Data],
+				    main_Schema = contract_analytics_Database{[Name="main",Kind="Schema"]}[Data],
+				    vw_supplier_financials_View = main_Schema{[Name="vw_supplier_financials",Kind="View"]}[Data]
+				in
+				    vw_supplier_financials_View
