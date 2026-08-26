@@ -1,0 +1,433 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
+  "name": "8406f2f551b95f0fffec",
+  "position": {
+    "x": 20,
+    "y": 145,
+    "z": 1000,
+    "height": 516.66666666666674,
+    "width": 1058.3333333333335,
+    "tabOrder": 1000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dSupplier"
+                    }
+                  },
+                  "Property": "supplier_cnpj"
+                }
+              },
+              "queryRef": "dSupplier.supplier_cnpj",
+              "nativeQueryRef": "CNPJ",
+              "displayName": "CNPJ"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dSupplier"
+                    }
+                  },
+                  "Property": "supplier_legal_name"
+                }
+              },
+              "queryRef": "dSupplier.supplier_legal_name",
+              "nativeQueryRef": "Fornecedor",
+              "displayName": "Fornecedor"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics_run_context"
+                    }
+                  },
+                  "Property": "Valor Anualizado Ativo — Fornecedor"
+                }
+              },
+              "queryRef": "analytics_run_context.Valor Anualizado Ativo — Fornecedor",
+              "nativeQueryRef": "Valor Contratado Ativo (Anual)",
+              "displayName": "Valor Contratado Ativo (Anual)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics_run_context"
+                    }
+                  },
+                  "Property": "Dependência Financeira — Fornecedor"
+                }
+              },
+              "queryRef": "analytics_run_context.Dependência Financeira — Fornecedor",
+              "nativeQueryRef": "Dep. Financeira",
+              "displayName": "Dep. Financeira"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics_run_context"
+                    }
+                  },
+                  "Property": "Faturamento Mais Recente — Fornecedor"
+                }
+              },
+              "queryRef": "analytics_run_context.Faturamento Mais Recente — Fornecedor",
+              "nativeQueryRef": "Último Faturamento",
+              "displayName": "Último Faturamento"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics_run_context"
+                    }
+                  },
+                  "Property": "Status Homologação Atual"
+                }
+              },
+              "queryRef": "analytics_run_context.Status Homologação Atual",
+              "nativeQueryRef": "Homologação",
+              "displayName": "Homologação"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics_run_context"
+                    }
+                  },
+                  "Property": "Risco Final Atual"
+                }
+              },
+              "queryRef": "analytics_run_context.Risco Final Atual",
+              "nativeQueryRef": "Risco Final",
+              "displayName": "Risco Final"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dSupplier"
+                    }
+                  },
+                  "Property": "financial_scenario"
+                }
+              },
+              "queryRef": "dSupplier.financial_scenario",
+              "nativeQueryRef": "Momento Empresa",
+              "displayName": "Momento Empresa"
+            }
+          ]
+        }
+      },
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "analytics_run_context"
+                  }
+                },
+                "Property": "Valor Anualizado Ativo — Fornecedor"
+              }
+            },
+            "direction": "Descending"
+          }
+        ]
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "columnAdjustment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'growToFit'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "12D"
+                }
+              }
+            },
+            "backColor": {
+              "solid": {
+                "color": {
+                  "expr": {
+                    "ThemeDataColor": {
+                      "ColorId": 4,
+                      "Percent": -0.5
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "values": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "13D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnFormatting": [
+        {
+          "properties": {
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Center'"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "analytics_run_context.Status Homologação Atual"
+          }
+        },
+        {
+          "properties": {
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Center'"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "analytics_run_context.Risco Final Atual"
+          }
+        },
+        {
+          "properties": {
+            "alignment": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Center'"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "dSupplier.financial_scenario"
+          }
+        },
+        {
+          "properties": {
+            "labelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "1000000D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "analytics_run_context.Valor Anualizado Ativo — Fornecedor"
+          }
+        },
+        {
+          "properties": {
+            "labelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "1000000D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "analytics_run_context.Faturamento Mais Recente — Fornecedor"
+          }
+        }
+      ],
+      "total": [
+        {
+          "properties": {
+            "totals": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "columnWidth": [
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "148.00000205091249D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "analytics_run_context.Valor Anualizado Ativo — Fornecedor"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "152D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "dSupplier.supplier_cnpj"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "155.64630644520173D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "analytics_run_context.Faturamento Mais Recente — Fornecedor"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "251.66667338988674D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "dSupplier.supplier_legal_name"
+          }
+        },
+        {
+          "properties": {
+            "value": {
+              "expr": {
+                "Literal": {
+                  "Value": "137.33332706455192D"
+                }
+              }
+            }
+          },
+          "selector": {
+            "metadata": "analytics_run_context.Dependência Financeira — Fornecedor"
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "stylePreset": [
+        {
+          "properties": {
+            "name": {
+              "expr": {
+                "Literal": {
+                  "Value": "'AlternatingRowsNew'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  },
+  "filterConfig": {
+    "filters": [
+      {
+        "name": "46f1b681696f4c63aae5",
+        "field": {
+          "Measure": {
+            "Expression": {
+              "SourceRef": {
+                "Entity": "analytics_run_context"
+              }
+            },
+            "Property": "Check Valor Ativo"
+          }
+        },
+        "type": "Advanced",
+        "filter": {
+          "Version": 2,
+          "From": [
+            {
+              "Name": "a",
+              "Entity": "analytics_run_context",
+              "Type": 0
+            }
+          ],
+          "Where": [
+            {
+              "Condition": {
+                "Comparison": {
+                  "ComparisonKind": 0,
+                  "Left": {
+                    "Measure": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Source": "a"
+                        }
+                      },
+                      "Property": "Check Valor Ativo"
+                    }
+                  },
+                  "Right": {
+                    "Literal": {
+                      "Value": "1L"
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "howCreated": "User"
+      }
+    ]
+  }
+}

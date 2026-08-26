@@ -113,4 +113,3 @@ table LocalDateTable_0c3f4cf3-2c21-45e0-87dc-a967bb84c021
 		source = Calendar(Date(Year(MIN('vw_supplier_financials'[financial_period_end_date])), 1, 1), Date(Year(MAX('vw_supplier_financials'[financial_period_end_date])), 12, 31))
 
 	annotation __PBI_LocalDateTable = true
-

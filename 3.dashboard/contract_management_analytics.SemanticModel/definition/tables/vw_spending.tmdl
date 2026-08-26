@@ -42,11 +42,6 @@ table vw_spending
 		summarizeBy: none
 		sourceColumn: payment_date
 
-		variation Variation
-			isDefault
-			relationship: b68ea51e-5d13-4aa1-a64b-8f803b90ad7f
-			defaultHierarchy: LocalDateTable_8a1572ad-ae79-4804-9aa4-53c892aef2c4.'Date Hierarchy'
-
 		annotation SummarizationSetBy = Automatic
 
 		annotation UnderlyingDateTimeDataType = Date
@@ -56,6 +51,8 @@ table vw_spending
 		lineageTag: 47298a21-81c6-4a7a-ac83-e2068c731565
 		summarizeBy: none
 		sourceColumn: contract_key
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -157,4 +154,3 @@ table vw_spending
 				    vw_spending_View = main_Schema{[Name="vw_spending",Kind="View"]}[Data]
 				in
 				    vw_spending_View
-

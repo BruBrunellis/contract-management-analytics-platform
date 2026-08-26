@@ -91,4 +91,3 @@ table vw_quality_exceptions
 				    vw_quality_exceptions_View = main_Schema{[Name="vw_quality_exceptions",Kind="View"]}[Data]
 				in
 				    vw_quality_exceptions_View
-

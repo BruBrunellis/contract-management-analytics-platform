@@ -16,6 +16,8 @@ table vw_supplier_financials
 		summarizeBy: sum
 		sourceColumn: financial_year
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
 	column financial_period_end_date
@@ -202,4 +204,3 @@ table vw_supplier_financials
 				    vw_supplier_financials_View = main_Schema{[Name="vw_supplier_financials",Kind="View"]}[Data]
 				in
 				    vw_supplier_financials_View
-

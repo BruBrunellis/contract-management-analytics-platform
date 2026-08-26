@@ -1,20 +1,66 @@
-// Medidas DAX de apresentação. As colunas e fórmulas de negócio são fornecidas
-// pelas views DuckDB. Formate valores monetários como R$ e percentuais como %.
-
-Valor Contratado =
-SUM(vw_contracts[total_value])
-
-Saldo Contratual =
-SUM(vw_contracts[balance_value])
-
-Valor Consumido =
-[Valor Contratado] - [Saldo Contratual]
-
-Percentual de Consumo =
-DIVIDE([Valor Consumido], [Valor Contratado])
+// Medidas DAX de referência. O TMDL salvo pelo Power BI é a fonte executável
+// do projeto; mantenha este arquivo sincronizado quando criar ou alterar uma
+// medida. As tabelas dCalendar e dAno suportam, respectivamente, a posição
+// acumulada em uma data de corte e o fluxo de um ano selecionado. dAno deve
+// permanecer desconectada do modelo.
+// Formate valores monetários como R$ e percentuais como %.
 
 Spending Total =
 SUM(vw_spending[payment_value])
+
+Data de Corte =
+MAX(dCalendar[Date])
+
+Valor Original até o Corte =
+VAR Corte = [Data de Corte]
+RETURN
+    CALCULATE(
+        SUM(vw_contracts[original_value]),
+        FILTER(
+            ALL(vw_contracts[validity_start_date]),
+            vw_contracts[validity_start_date] <= Corte
+        )
+    )
+
+Valor de Renovações até o Corte =
+VAR Corte = [Data de Corte]
+RETURN
+    CALCULATE(
+        SUM(vw_renewals[amendment_value]),
+        vw_renewals[amendment_type] = "renovacao",
+        FILTER(
+            ALL(vw_renewals[validity_start_date]),
+            vw_renewals[validity_start_date] <= Corte
+        )
+    )
+
+Valor de Aportes até o Corte =
+VAR Corte = [Data de Corte]
+RETURN
+    CALCULATE(
+        SUM(vw_renewals[amendment_value]),
+        vw_renewals[amendment_type] = "aporte",
+        FILTER(
+            ALL(vw_renewals[validity_start_date]),
+            vw_renewals[validity_start_date] <= Corte
+        )
+    )
+
+Valor Contratado até o Corte =
+[Valor Original até o Corte]
+    + [Valor de Renovações até o Corte]
+    + [Valor de Aportes até o Corte]
+
+Valor Consumido até o Corte =
+VAR Corte = [Data de Corte]
+RETURN
+    CALCULATE(
+        SUM(vw_spending[payment_value]),
+        FILTER(ALL(dCalendar), dCalendar[Date] <= Corte)
+    )
+
+Saldo Contratual no Corte =
+[Valor Contratado até o Corte] - [Valor Consumido até o Corte]
 
 Quantidade de Contratos =
 DISTINCTCOUNT(vw_contracts[contract_key])
@@ -76,4 +122,217 @@ Entidades com Falha de Qualidade =
 CALCULATE(
     DISTINCTCOUNT(vw_quality_reconciliation[entity]),
     vw_quality_reconciliation[status] <> "approved"
+)
+
+// Visão anual. Use dAno[Ano] no segundo segmentador; não crie relacionamento
+// entre dAno e as demais tabelas.
+
+Ano Selecionado =
+COALESCE(SELECTEDVALUE(dAno[Ano]), MAX(dCalendar[Ano]))
+
+Valor Original no Ano =
+VAR Inicio = DATE([Ano Selecionado], 1, 1)
+VAR Fim = DATE([Ano Selecionado], 12, 31)
+RETURN
+    CALCULATE(
+        SUM(vw_contracts[original_value]),
+        REMOVEFILTERS(dCalendar),
+        FILTER(
+            ALL(vw_contracts[validity_start_date]),
+            vw_contracts[validity_start_date] >= Inicio
+                && vw_contracts[validity_start_date] <= Fim
+        )
+    )
+
+Valor de Renovações no Ano =
+VAR Inicio = DATE([Ano Selecionado], 1, 1)
+VAR Fim = DATE([Ano Selecionado], 12, 31)
+RETURN
+    CALCULATE(
+        SUM(vw_renewals[amendment_value]),
+        REMOVEFILTERS(dCalendar),
+        vw_renewals[amendment_type] = "renovacao",
+        FILTER(
+            ALL(vw_renewals[validity_start_date]),
+            vw_renewals[validity_start_date] >= Inicio
+                && vw_renewals[validity_start_date] <= Fim
+        )
+    )
+
+Valor de Aportes no Ano =
+VAR Inicio = DATE([Ano Selecionado], 1, 1)
+VAR Fim = DATE([Ano Selecionado], 12, 31)
+RETURN
+    CALCULATE(
+        SUM(vw_renewals[amendment_value]),
+        REMOVEFILTERS(dCalendar),
+        vw_renewals[amendment_type] = "aporte",
+        FILTER(
+            ALL(vw_renewals[validity_start_date]),
+            vw_renewals[validity_start_date] >= Inicio
+                && vw_renewals[validity_start_date] <= Fim
+        )
+    )
+
+Valor Contratado no Ano =
+[Valor Original no Ano]
+    + [Valor de Renovações no Ano]
+    + [Valor de Aportes no Ano]
+
+Valor Consumido no Ano =
+VAR Inicio = DATE([Ano Selecionado], 1, 1)
+VAR Fim = DATE([Ano Selecionado], 12, 31)
+RETURN
+    CALCULATE(
+        SUM(vw_spending[payment_value]),
+        REMOVEFILTERS(dCalendar),
+        FILTER(
+            ALL(vw_spending[payment_date]),
+            vw_spending[payment_date] >= Inicio
+                && vw_spending[payment_date] <= Fim
+        )
+    )
+
+Valor Contratado até Fim do Ano =
+VAR Corte = DATE([Ano Selecionado], 12, 31)
+RETURN
+    CALCULATE(
+        SUM(vw_contracts[original_value]),
+        REMOVEFILTERS(dCalendar),
+        FILTER(ALL(vw_contracts[validity_start_date]), vw_contracts[validity_start_date] <= Corte)
+    )
+    + CALCULATE(
+        SUM(vw_renewals[amendment_value]),
+        REMOVEFILTERS(dCalendar),
+        FILTER(ALL(vw_renewals[validity_start_date]), vw_renewals[validity_start_date] <= Corte)
+    )
+
+Valor Consumido até Fim do Ano =
+VAR Corte = DATE([Ano Selecionado], 12, 31)
+RETURN
+    CALCULATE(
+        SUM(vw_spending[payment_value]),
+        REMOVEFILTERS(dCalendar),
+        FILTER(ALL(vw_spending[payment_date]), vw_spending[payment_date] <= Corte)
+    )
+
+Saldo em 31 de Dezembro =
+[Valor Contratado até Fim do Ano] - [Valor Consumido até Fim do Ano]
+
+Variação Líquida no Ano =
+[Valor Contratado no Ano] - [Valor Consumido no Ano]
+
+// O cenário encerra contratos por avaliação de risco. A coluna é nula para
+// contratos não encerrados e foi exposta pela vw_contracts para datar o evento.
+Contratos Encerrados no Ano =
+VAR Inicio = DATE([Ano Selecionado], 1, 1)
+VAR Fim = DATE([Ano Selecionado], 12, 31)
+RETURN
+    CALCULATE(
+        DISTINCTCOUNT(vw_contracts[contract_key]),
+        REMOVEFILTERS(dCalendar),
+        REMOVEFILTERS(vw_contracts[contract_status]),
+        vw_contracts[contract_status] = "encerrado",
+        FILTER(
+            ALL(vw_contracts[risk_evaluation_date]),
+            vw_contracts[risk_evaluation_date] >= Inicio
+                && vw_contracts[risk_evaluation_date] <= Fim
+        )
+    )
+
+// Painel de Contratos. O índice considera somente o saldo ainda exposto:
+// alto = 100%, médio = 50% e baixo = 10%.
+Risco Final Ponderado =
+VAR SaldoExposto =
+    SUMX(FILTER(vw_contracts, vw_contracts[balance_value] > 0), vw_contracts[balance_value])
+VAR SaldoPonderado =
+    SUMX(
+        FILTER(vw_contracts, vw_contracts[balance_value] > 0),
+        vw_contracts[balance_value]
+            * SWITCH(vw_contracts[final_risk], "alto", 1.0, "medio", 0.5, "baixo", 0.1)
+    )
+RETURN
+    DIVIDE(SaldoPonderado, SaldoExposto)
+
+Variação Valor Contratado por Categoria =
+VAR AnosSelecionados = VALUES(dAno[Ano])
+VAR PrimeiroAno = MINX(AnosSelecionados, dAno[Ano])
+VAR UltimoAno = MAXX(AnosSelecionados, dAno[Ano])
+VAR AnoBase = IF(PrimeiroAno = UltimoAno, UltimoAno - 1, PrimeiroAno)
+VAR ValorBase = CALCULATE([Valor Contratado no Ano], REMOVEFILTERS(dAno), dAno[Ano] = AnoBase)
+VAR ValorFinal = CALCULATE([Valor Contratado no Ano], REMOVEFILTERS(dAno), dAno[Ano] = UltimoAno)
+RETURN
+    IF(AnoBase = UltimoAno, BLANK(), DIVIDE(ValorFinal - ValorBase, ValorBase))
+
+Percentual Consumido por Contrato =
+DIVIDE(
+    SUM(vw_contracts[total_value]) - SUM(vw_contracts[balance_value]),
+    SUM(vw_contracts[total_value])
+)
+
+Percentual de Vigência Decorrida =
+VAR Inicio = MIN(vw_contracts[validity_start_date])
+VAR Fim = MAX(vw_contracts[validity_end_date])
+VAR Referencia = [Data de Referencia]
+RETURN
+    IF(
+        ISBLANK(Inicio) || ISBLANK(Fim) || DATEDIFF(Inicio, Fim, DAY) <= 0,
+        BLANK(),
+        MIN(1, MAX(0, DIVIDE(DATEDIFF(Inicio, Referencia, DAY), DATEDIFF(Inicio, Fim, DAY))))
+    )
+
+Risco de Aporte =
+VAR Desvio = [Percentual Consumido por Contrato] - [Percentual de Vigência Decorrida]
+RETURN
+    SWITCH(TRUE(), ISBLANK(Desvio), BLANK(), Desvio >= 0.20, "alto", Desvio >= 0.05, "medio", "baixo")
+
+// Referência das medidas introduzidas no Painel de Fornecedores e no grid móvel.
+// O arquivo TMDL contém as expressões executáveis completas e seus formatos.
+// dJanelaComparacao é desconectada e deve interagir somente com o grid de categoria.
+Janela Selecionada (Meses) =
+SELECTEDVALUE(dJanelaComparacao[Meses], 12)
+
+Variação % Valor Contratado por Categoria =
+VAR Atual = [Valor Contratado — Período Atual]
+VAR Anterior = [Valor Contratado — Período Anterior]
+RETURN
+    IF(ISBLANK(Anterior) || Anterior = 0, BLANK(), DIVIDE(Atual - Anterior, Anterior))
+
+// Valor anualizado considera contratos ativos e vigentes na Data de Referencia.
+Valor Anualizado de Contratos Ativos =
+VAR Referencia = [Data de Referencia]
+RETURN
+    SUMX(
+        FILTER(vw_contracts, vw_contracts[contract_status] = "ativo" && vw_contracts[validity_start_date] <= Referencia && vw_contracts[validity_end_date] >= Referencia),
+        DIVIDE(vw_contracts[total_value] * 365.25, DATEDIFF(vw_contracts[validity_start_date], vw_contracts[validity_end_date], DAY) + 1)
+    )
+
+Dependência Financeira — Fornecedor =
+DIVIDE([Valor Anualizado Ativo — Fornecedor], [Faturamento Mais Recente — Fornecedor])
+
+Dependência Financeira Ponderada por Categoria =
+VAR ContratosValidos =
+    FILTER(VALUES(vw_contracts[contract_key]), [Valor Anualizado de Contratos Ativos] > 0 && NOT ISBLANK([Dependência Financeira — Fornecedor]))
+RETURN
+    DIVIDE(
+        SUMX(ContratosValidos, [Dependência Financeira — Fornecedor] * [Valor Anualizado de Contratos Ativos]),
+        SUMX(ContratosValidos, [Valor Anualizado de Contratos Ativos])
+    )
+
+Cenários Financeiros =
+VAR Referencia = [Data de Referencia]
+RETURN
+    CALCULATE(
+        DISTINCTCOUNT(dSupplier[supplier_key]),
+        REMOVEFILTERS(dCalendar),
+        FILTER(
+            VALUES(dSupplier[supplier_key]),
+            CALCULATE(COUNTROWS(vw_contracts), REMOVEFILTERS(dCalendar), vw_contracts[contract_status] = "ativo", vw_contracts[validity_start_date] <= Referencia, vw_contracts[validity_end_date] >= Referencia) > 0
+        )
+    )
+
+Margem Líquida Ponderada — Fornecedores Ativos =
+DIVIDE(
+    CALCULATE(SUM(vw_supplier_financials[net_income]), FILTER(VALUES(dSupplier[supplier_key]), [Valor Anualizado de Contratos Ativos] > 0)),
+    [Faturamento — Fornecedores Ativos]
 )

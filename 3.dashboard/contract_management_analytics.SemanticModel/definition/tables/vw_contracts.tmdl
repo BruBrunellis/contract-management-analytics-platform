@@ -183,6 +183,22 @@ table vw_contracts
 
 		annotation UnderlyingDateTimeDataType = Date
 
+	column risk_evaluation_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 6822451a-414a-4511-9e39-2da71b294be4
+		summarizeBy: none
+		sourceColumn: risk_evaluation_date
+
+		variation Variation
+			isDefault
+			relationship: 243a5fd3-5f91-4488-91f5-9f93b24e13d0
+			defaultHierarchy: LocalDateTable_56003dfd-e7b9-4234-97a0-81f8975302c4.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
 	partition vw_contracts = m
 		mode: import
 		source =
@@ -193,4 +209,3 @@ table vw_contracts
 				    vw_contracts_View = main_Schema{[Name="vw_contracts",Kind="View"]}[Data]
 				in
 				    vw_contracts_View
-

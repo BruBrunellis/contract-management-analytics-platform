@@ -113,4 +113,3 @@ table LocalDateTable_5cca1933-f5e4-489b-a63f-c057e3f1d894
 		source = Calendar(Date(Year(MIN('analytics_run_context'[as_of_date])), 1, 1), Date(Year(MAX('analytics_run_context'[as_of_date])), 12, 31))
 
 	annotation __PBI_LocalDateTable = true
-

@@ -1,4 +1,4 @@
-table vw_suppliers
+table dSupplier
 	lineageTag: f59f0b71-ad40-42eb-b7ab-2a7a633df7d9
 
 	column supplier_key
@@ -6,6 +6,8 @@ table vw_suppliers
 		lineageTag: 900e2aeb-d732-4e23-a0ef-17f6f59bd76c
 		summarizeBy: none
 		sourceColumn: supplier_key
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -15,6 +17,8 @@ table vw_suppliers
 		summarizeBy: none
 		sourceColumn: supplier_cnpj
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
 	column supplier_legal_name
@@ -22,6 +26,8 @@ table vw_suppliers
 		lineageTag: 0deb2aef-e4db-4184-b1e8-70612fdbd302
 		summarizeBy: none
 		sourceColumn: supplier_legal_name
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -31,6 +37,8 @@ table vw_suppliers
 		summarizeBy: none
 		sourceColumn: supplier_hierarchy
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
 	column company_size
@@ -38,6 +46,8 @@ table vw_suppliers
 		lineageTag: ad235b30-67e7-4107-ba43-7bde0766d70c
 		summarizeBy: none
 		sourceColumn: company_size
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -47,6 +57,8 @@ table vw_suppliers
 		summarizeBy: none
 		sourceColumn: economic_activity
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
 	column economic_group_key
@@ -54,6 +66,8 @@ table vw_suppliers
 		lineageTag: 29763bcd-1263-4ca7-85e5-8a86ea51d0ba
 		summarizeBy: none
 		sourceColumn: economic_group_key
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -63,6 +77,8 @@ table vw_suppliers
 		summarizeBy: none
 		sourceColumn: economic_group_legal_name
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
 	column parent_supplier_key
@@ -70,6 +86,8 @@ table vw_suppliers
 		lineageTag: 312e5efb-b3a6-42dc-b85e-c893f3dabbc5
 		summarizeBy: none
 		sourceColumn: parent_supplier_key
+
+		changedProperty = IsHidden
 
 		annotation SummarizationSetBy = Automatic
 
@@ -79,9 +97,11 @@ table vw_suppliers
 		summarizeBy: none
 		sourceColumn: financial_scenario
 
+		changedProperty = IsHidden
+
 		annotation SummarizationSetBy = Automatic
 
-	partition vw_suppliers = m
+	partition dSupplier = m
 		mode: import
 		source =
 				let
@@ -92,3 +112,6 @@ table vw_suppliers
 				in
 				    vw_suppliers_View
 
+	changedProperty = IsHidden
+
+	changedProperty = Name

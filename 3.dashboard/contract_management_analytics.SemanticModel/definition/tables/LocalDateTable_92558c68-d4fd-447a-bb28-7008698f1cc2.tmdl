@@ -113,4 +113,3 @@ table LocalDateTable_92558c68-d4fd-447a-bb28-7008698f1cc2
 		source = Calendar(Date(Year(MIN('vw_rfi'[assessment_date])), 1, 1), Date(Year(MAX('vw_rfi'[assessment_date])), 12, 31))
 
 	annotation __PBI_LocalDateTable = true
-

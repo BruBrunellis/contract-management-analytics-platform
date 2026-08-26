@@ -195,4 +195,3 @@ table vw_rfi
 				    vw_rfi_View = main_Schema{[Name="vw_rfi",Kind="View"]}[Data]
 				in
 				    vw_rfi_View
-

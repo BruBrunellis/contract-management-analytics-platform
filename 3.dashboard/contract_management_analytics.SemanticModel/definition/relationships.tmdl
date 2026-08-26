@@ -33,11 +33,6 @@ relationship 88eb87af-5ea9-48d5-aa36-5e9fdf72d4ef
 	fromColumn: vw_rfi.expiration_date
 	toColumn: LocalDateTable_f8240c0b-b25e-4388-bae0-e1807cafee12.Date
 
-relationship b68ea51e-5d13-4aa1-a64b-8f803b90ad7f
-	joinOnDateBehavior: datePartOnly
-	fromColumn: vw_spending.payment_date
-	toColumn: LocalDateTable_8a1572ad-ae79-4804-9aa4-53c892aef2c4.Date
-
 relationship 1af6b2ad-c8aa-460d-9759-9bf15eb45680
 	joinOnDateBehavior: datePartOnly
 	fromColumn: vw_supplier_financials.financial_period_end_date
@@ -58,27 +53,55 @@ relationship AutoDetected_efc553ab-0339-429e-bed4-732a5af05c98
 
 relationship AutoDetected_6318fa21-10fe-4f1c-a7ec-96fe2cf80701
 	fromColumn: vw_contracts.supplier_key
-	toColumn: vw_suppliers.supplier_key
+	toColumn: dSupplier.supplier_key
 
 relationship AutoDetected_fb99164c-890e-4362-86f7-380e700d35e6
 	isActive: false
 	fromColumn: vw_renewals.supplier_key
-	toColumn: vw_suppliers.supplier_key
+	toColumn: dSupplier.supplier_key
 
 relationship AutoDetected_91abea32-bb71-48c4-8055-2736daf234d5
 	fromColumn: vw_rfi.supplier_key
-	toColumn: vw_suppliers.supplier_key
+	toColumn: dSupplier.supplier_key
 
 relationship AutoDetected_3e1bda9a-3886-4e9d-aad4-9b6a067383b3
 	isActive: false
 	fromColumn: vw_spending.supplier_key
-	toColumn: vw_suppliers.supplier_key
+	toColumn: dSupplier.supplier_key
 
 relationship AutoDetected_cf9f8295-bc81-4ce3-879c-c07c05257607
 	fromColumn: vw_supplier_financials.supplier_key
-	toColumn: vw_suppliers.supplier_key
+	toColumn: dSupplier.supplier_key
 
 relationship AutoDetected_a40a4f29-4fea-42ce-a917-211792844664
 	fromColumn: vw_quality_reconciliation.pipeline_run_id
 	toColumn: analytics_run_context.pipeline_run_id
+
+relationship AutoDetected_7e431503-6f12-4290-9e11-cfa73cbf2066
+	fromColumn: vw_contracts.category_key
+	toColumn: dCategory.category_key
+
+relationship AutoDetected_5e49d03c-7706-4609-8fbd-6ef70ed94205
+	isActive: false
+	fromColumn: vw_renewals.category_key
+	toColumn: dCategory.category_key
+
+relationship AutoDetected_e6cc293b-e513-45ec-90d0-0baf168a378b
+	isActive: false
+	fromColumn: vw_spending.category_key
+	toColumn: dCategory.category_key
+
+relationship 1c07e875-072d-4788-a139-29be1b96f371
+	joinOnDateBehavior: datePartOnly
+	fromColumn: dCalendar.Date
+	toColumn: LocalDateTable_58a220bf-fc6a-4177-ac69-f607a63b015e.Date
+
+relationship ff4288e8-929b-90b9-583f-132ba07163a2
+	fromColumn: vw_spending.payment_date
+	toColumn: dCalendar.Date
+
+relationship 243a5fd3-5f91-4488-91f5-9f93b24e13d0
+	joinOnDateBehavior: datePartOnly
+	fromColumn: vw_contracts.risk_evaluation_date
+	toColumn: LocalDateTable_56003dfd-e7b9-4234-97a0-81f8975302c4.Date
 

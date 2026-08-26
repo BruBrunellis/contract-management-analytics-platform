@@ -174,4 +174,3 @@ table vw_renewals
 				    vw_renewals_View = main_Schema{[Name="vw_renewals",Kind="View"]}[Data]
 				in
 				    vw_renewals_View
-

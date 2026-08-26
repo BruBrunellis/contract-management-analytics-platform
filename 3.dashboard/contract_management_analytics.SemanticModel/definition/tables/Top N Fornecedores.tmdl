@@ -1,0 +1,25 @@
+table 'Top N Fornecedores'
+	lineageTag: e5005cbd-f1d9-45fa-9ad7-dae2e3c183f3
+
+	measure 'Top Fornecedores Value' = SELECTEDVALUE('Top N Fornecedores'[Top Fornecedores], 10)
+		formatString: 0
+		lineageTag: 55f53be6-d0de-4b61-b8c2-11984807744d
+
+	column 'Top Fornecedores'
+		formatString: 0
+		lineageTag: 61763585-a267-4887-99b7-8c639bd4f296
+		summarizeBy: none
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+		annotation SummarizationSetBy = User
+
+	partition 'Top N Fornecedores' = calculated
+		mode: import
+		source = GENERATESERIES(5, 20, 5)
+
+	annotation PBI_Id = 0b38842dbb224a7a8ddba5a0a97af449

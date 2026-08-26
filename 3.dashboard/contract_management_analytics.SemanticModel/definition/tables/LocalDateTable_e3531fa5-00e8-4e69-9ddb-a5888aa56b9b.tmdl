@@ -113,4 +113,3 @@ table LocalDateTable_e3531fa5-00e8-4e69-9ddb-a5888aa56b9b
 		source = Calendar(Date(Year(MIN('vw_renewals'[validity_start_date])), 1, 1), Date(Year(MAX('vw_renewals'[validity_start_date])), 12, 31))
 
 	annotation __PBI_LocalDateTable = true
-

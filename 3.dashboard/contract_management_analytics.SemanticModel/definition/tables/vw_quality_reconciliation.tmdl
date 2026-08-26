@@ -153,4 +153,3 @@ table vw_quality_reconciliation
 				    vw_quality_reconciliation_View = main_Schema{[Name="vw_quality_reconciliation",Kind="View"]}[Data]
 				in
 				    vw_quality_reconciliation_View
-
