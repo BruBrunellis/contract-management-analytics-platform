@@ -1,0 +1,64 @@
+table dCategory
+	lineageTag: 2d304033-b5b5-4deb-9edd-1bb2fce4f5e4
+
+	column category_key
+		dataType: string
+		lineageTag: cc0a0fdc-be32-43d2-87c9-0738d29750ca
+		summarizeBy: none
+		sourceColumn: category_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_code
+		dataType: string
+		lineageTag: 82fb6ef8-4e81-4a91-8651-64e5f327edb7
+		summarizeBy: none
+		sourceColumn: category_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_name
+		dataType: string
+		lineageTag: e9684b6c-bad6-4478-9d97-0963df7e63ab
+		summarizeBy: none
+		sourceColumn: category_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_macro_group
+		dataType: string
+		lineageTag: 4d28cc4a-57e9-46d2-9f31-ef161f27470a
+		summarizeBy: none
+		sourceColumn: category_macro_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_group
+		dataType: string
+		lineageTag: fa6e3fdc-927e-49fb-aa9c-20c4858a1f4a
+		summarizeBy: none
+		sourceColumn: category_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_family
+		dataType: string
+		lineageTag: 7b54f380-e809-4de9-a240-5077009eb2e1
+		summarizeBy: none
+		sourceColumn: category_family
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dCategory = m
+		mode: import
+		source =
+				let
+				    Source = vw_contracts,
+				    #"Removed Other Columns" = Table.SelectColumns(Source,{"category_key", "category_code", "category_name", "category_macro_group", "category_group", "category_family"}),
+				    #"Removed Duplicates" = Table.Distinct(#"Removed Other Columns", {"category_key"})
+				in
+				    #"Removed Duplicates"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table

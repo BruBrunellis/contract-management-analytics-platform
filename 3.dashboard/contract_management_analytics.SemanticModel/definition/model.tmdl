@@ -1,0 +1,44 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: pt-BR
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_ProTooling = ["DevMode"]
+
+annotation PBI_QueryOrder = ["vw_contracts","vw_quality_exceptions","vw_quality_reconciliation","vw_renewals","vw_rfi","vw_spending","vw_supplier_financials","dSupplier","analytics_run_context","dCategory"]
+
+ref table vw_contracts
+ref table DateTableTemplate_a04005d7-8e66-4c54-95bc-48aebf3199f4
+ref table LocalDateTable_0ec674b1-d29c-4caa-8829-f7906788afe8
+ref table LocalDateTable_f425aebe-39e5-4450-a931-7b1a42ff4023
+ref table vw_quality_exceptions
+ref table vw_quality_reconciliation
+ref table vw_renewals
+ref table LocalDateTable_e3531fa5-00e8-4e69-9ddb-a5888aa56b9b
+ref table LocalDateTable_edf3fdc8-4bea-4032-897a-d11830f95ef7
+ref table vw_rfi
+ref table LocalDateTable_92558c68-d4fd-447a-bb28-7008698f1cc2
+ref table LocalDateTable_9ba0385c-0cee-498b-b0d2-b38508dba44f
+ref table LocalDateTable_f8240c0b-b25e-4388-bae0-e1807cafee12
+ref table vw_spending
+ref table vw_supplier_financials
+ref table LocalDateTable_0c3f4cf3-2c21-45e0-87dc-a967bb84c021
+ref table dSupplier
+ref table analytics_run_context
+ref table LocalDateTable_5cca1933-f5e4-489b-a63f-c057e3f1d894
+ref table dCategory
+ref table dCalendar
+ref table LocalDateTable_58a220bf-fc6a-4177-ac69-f607a63b015e
+ref table dAno
+ref table 'Top N Fornecedores'
+ref table dJanelaComparacao
+ref table LocalDateTable_56003dfd-e7b9-4234-97a0-81f8975302c4
+
+ref cultureInfo en-US
+

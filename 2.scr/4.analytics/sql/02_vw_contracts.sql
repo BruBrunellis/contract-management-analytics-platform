@@ -19,7 +19,8 @@ SELECT
     category.category_group,
     category.category_family,
     start_calendar.calendar_date AS validity_start_date,
-    end_calendar.calendar_date AS validity_end_date
+    end_calendar.calendar_date AS validity_end_date,
+    risk_calendar.calendar_date AS risk_evaluation_date
 FROM src_dim_contract AS contract
 INNER JOIN src_dim_supplier AS supplier
     USING (supplier_key)
@@ -28,4 +29,6 @@ INNER JOIN src_dim_category AS category
 LEFT JOIN src_dim_calendar AS start_calendar
     ON contract.validity_start_calendar_key = start_calendar.calendar_key
 LEFT JOIN src_dim_calendar AS end_calendar
-    ON contract.validity_end_calendar_key = end_calendar.calendar_key;
+    ON contract.validity_end_calendar_key = end_calendar.calendar_key
+LEFT JOIN src_dim_calendar AS risk_calendar
+    ON contract.risk_evaluation_calendar_key = risk_calendar.calendar_key;

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "6371564f490fdd1d5f4f",
+  "displayName": "Visão de Categoria",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920,
+  "pageBinding": {
+    "name": "ab2be6c2c8c2ce50ac74",
+    "type": "Default",
+    "parameters": []
+  }
+}

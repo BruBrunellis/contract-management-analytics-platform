@@ -1,0 +1,156 @@
+table vw_spending
+	lineageTag: a83650ae-caf4-400a-bb6a-da3f0b62d06b
+
+	column spending_key
+		dataType: string
+		lineageTag: 2641a819-88fa-4745-a74e-9baa683333a4
+		summarizeBy: none
+		sourceColumn: spending_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_id
+		dataType: string
+		lineageTag: ddeabb59-63fd-4df8-b829-30b36fd580f8
+		summarizeBy: none
+		sourceColumn: payment_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_value
+		dataType: double
+		lineageTag: 2acc4114-fcbd-4d53-9c11-0cee68c391e5
+		summarizeBy: sum
+		sourceColumn: payment_value
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column cost_center
+		dataType: string
+		lineageTag: 97849adf-c0b0-4213-b953-1530a2f62b42
+		summarizeBy: none
+		sourceColumn: cost_center
+
+		annotation SummarizationSetBy = Automatic
+
+	column payment_date
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 5148040d-6a9a-4f6d-8069-61fbcfea4dcf
+		summarizeBy: none
+		sourceColumn: payment_date
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column contract_key
+		dataType: string
+		lineageTag: 47298a21-81c6-4a7a-ac83-e2068c731565
+		summarizeBy: none
+		sourceColumn: contract_key
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column contract_id
+		dataType: string
+		lineageTag: 86506162-65b5-4fb6-a5ae-183edc9b418e
+		summarizeBy: none
+		sourceColumn: contract_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column contract_status
+		dataType: string
+		lineageTag: 58a47477-7655-4d53-b932-12392b40ac0d
+		summarizeBy: none
+		sourceColumn: contract_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier_key
+		dataType: string
+		lineageTag: 3a031664-eb93-46ef-a0a8-f2aabc5b3a97
+		summarizeBy: none
+		sourceColumn: supplier_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column supplier_legal_name
+		dataType: string
+		lineageTag: 8182596c-be8d-4d99-9a6e-8e24fc431bd7
+		summarizeBy: none
+		sourceColumn: supplier_legal_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column economic_group_key
+		dataType: string
+		lineageTag: d55484fa-b37e-4f36-b4d2-8317ee263eb5
+		summarizeBy: none
+		sourceColumn: economic_group_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_key
+		dataType: string
+		lineageTag: 1fed7f2d-f1a5-4825-8909-2c956da2fac2
+		summarizeBy: none
+		sourceColumn: category_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_code
+		dataType: string
+		lineageTag: f3f900e9-c0ef-47ac-9142-4562b7301d0a
+		summarizeBy: none
+		sourceColumn: category_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_name
+		dataType: string
+		lineageTag: 08d072fe-4e4a-42b4-b1eb-d58b4d545b28
+		summarizeBy: none
+		sourceColumn: category_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_macro_group
+		dataType: string
+		lineageTag: db1b679e-3d05-4f81-a2c9-18c2a9360dea
+		summarizeBy: none
+		sourceColumn: category_macro_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_group
+		dataType: string
+		lineageTag: 49235eba-25cb-4292-b73c-d98a76ef19eb
+		summarizeBy: none
+		sourceColumn: category_group
+
+		annotation SummarizationSetBy = Automatic
+
+	column category_family
+		dataType: string
+		lineageTag: 449865ce-e601-4fa7-8d38-27ea6960a62e
+		summarizeBy: none
+		sourceColumn: category_family
+
+		annotation SummarizationSetBy = Automatic
+
+	partition vw_spending = m
+		mode: import
+		source =
+				let
+				    Source = Odbc.DataSource("dsn=Contract_analytics", [HierarchicalNavigation=true]),
+				    contract_analytics_Database = Source{[Name="contract_analytics",Kind="Database"]}[Data],
+				    main_Schema = contract_analytics_Database{[Name="main",Kind="Schema"]}[Data],
+				    vw_spending_View = main_Schema{[Name="vw_spending",Kind="View"]}[Data]
+				in
+				    vw_spending_View
