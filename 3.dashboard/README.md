@@ -59,9 +59,9 @@ ignorados pelo Git.
 ## Atualizar a fonte
 
 ```powershell
-python .\2.scr\generate_raw.py
-python .\2.scr\run_etl.py
-python .\2.scr\4.analytics\build_analytics.py `
+python .\2.src\generate_raw.py
+python .\2.src\run_etl.py
+python .\2.src\4.analytics\build_analytics.py `
   --etl-manifest .\1.data\3.curated\<pipeline_run_id>\etl_manifest.json
 ```
 

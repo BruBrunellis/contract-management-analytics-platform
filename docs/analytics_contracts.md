@@ -31,14 +31,14 @@ categoria (`category_macro_group`, `category_group`, `category_family` e
 `category_name`) para consumo direto do dashboard sem recorrer às views internas
 `src_*`.
 
-As consultas de KPI ficam em `2.scr/4.analytics/kpis/` e são executadas sobre
+As consultas de KPI ficam em `2.src/4.analytics/kpis/` e são executadas sobre
 essas views. Consulte o [dicionário de métricas](metric_dictionary.md) para
 fórmulas, grão e tratamento de exceções.
 
 ## Execução
 
 ```powershell
-python .\2.scr\4.analytics\build_analytics.py `
+python .\2.src\4.analytics\build_analytics.py `
   --etl-manifest .\1.data\3.curated\<pipeline_run_id>\etl_manifest.json
 ```
 
