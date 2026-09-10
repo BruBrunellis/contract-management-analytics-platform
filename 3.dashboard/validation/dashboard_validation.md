@@ -24,7 +24,7 @@ o mesmo arquivo DuckDB selecionado no DSN `Contract_analytics`.
 Sob o mesmo filtro de categoria, fornecedor e período aplicado no relatório:
 
 - [ ] Valor contratado, saldo e consumo igualam
-  `2.scr/4.analytics/kpis/01_contract_balance_and_consumption.sql`.
+  `2.src/4.analytics/kpis/01_contract_balance_and_consumption.sql`.
 - [ ] Na posição acumulada, o contratado é `original_value` mais renovações e
   aportes com início até a data de corte; o consumido é a soma de pagamentos
   até a mesma data.

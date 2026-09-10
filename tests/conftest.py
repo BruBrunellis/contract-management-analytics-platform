@@ -32,7 +32,7 @@ def pytest_sessionfinish(session, exitstatus):
 
 
 def load_module(filename):
-    path = PROJECT_ROOT / "2.scr" / "1.generator" / filename
+    path = PROJECT_ROOT / "2.src" / "1.generator" / filename
     spec = importlib.util.spec_from_file_location(path.stem, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -40,7 +40,7 @@ def load_module(filename):
 
 
 def load_staging_module(filename="stg_empresas.py"):
-    path = PROJECT_ROOT / "2.scr" / "2.etl" / filename
+    path = PROJECT_ROOT / "2.src" / "2.etl" / filename
     if str(path.parent) not in sys.path:
         sys.path.insert(0, str(path.parent))
     spec = importlib.util.spec_from_file_location(path.stem, path)
@@ -50,7 +50,7 @@ def load_staging_module(filename="stg_empresas.py"):
 
 
 def load_curated_module(filename="dim_fornecedores.py"):
-    path = PROJECT_ROOT / "2.scr" / "3.curated" / filename
+    path = PROJECT_ROOT / "2.src" / "3.curated" / filename
     spec = importlib.util.spec_from_file_location(path.stem, path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -58,7 +58,7 @@ def load_curated_module(filename="dim_fornecedores.py"):
 
 
 def load_pipeline_runner():
-    path = PROJECT_ROOT / "2.scr" / "run_pipeline.py"
+    path = PROJECT_ROOT / "2.src" / "run_pipeline.py"
     spec = importlib.util.spec_from_file_location("run_pipeline", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

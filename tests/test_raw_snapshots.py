@@ -6,7 +6,7 @@ from pathlib import Path
 import pandas as pd
 from conftest import PROJECT_ROOT
 
-SCRIPT_DIR = PROJECT_ROOT / "2.scr"
+SCRIPT_DIR = PROJECT_ROOT / "2.src"
 
 
 def carregar_script(nome):

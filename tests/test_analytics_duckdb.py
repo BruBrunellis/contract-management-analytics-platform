@@ -7,7 +7,7 @@ import duckdb
 import pytest
 from conftest import PROJECT_ROOT
 
-SCRIPT_DIR = PROJECT_ROOT / "2.scr"
+SCRIPT_DIR = PROJECT_ROOT / "2.src"
 
 
 def carregar_script(caminho_relativo):

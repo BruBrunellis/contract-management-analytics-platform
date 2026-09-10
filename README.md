@@ -16,7 +16,7 @@ Plataforma de dados fictícios para análise de contratos, fornecedores, riscos,
   1.raw/       # Arquivos CSV versionados gerados pelos scripts
   2.staging/   # Arquivos Parquet padronizados e exceções de qualidade
   3.curated/   # Camada analítica futura
-2.scr/
+2.src/
   1.generator/ # Geradores das fontes primárias
   2.etl/       # Transformações da camada staging
   3.curated/   # Publicações do modelo dimensional
@@ -58,19 +58,19 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements-dev.txt
 
-python .\2.scr\1.generator\company_generator.py
-python .\2.scr\1.generator\risk_generator.py
-python .\2.scr\1.generator\contract_generator.py
-python .\2.scr\1.generator\spending_generator.py
-python .\2.scr\2.etl\stg_empresas.py
-python .\2.scr\2.etl\stg_contratos.py
-python .\2.scr\2.etl\stg_aditamentos.py
-python .\2.scr\2.etl\stg_pagamentos.py
-python .\2.scr\2.etl\stg_homologacoes_risco.py
-python .\2.scr\3.curated\dim_fornecedores.py
-python .\2.scr\3.curated\dim_calendario_categoria.py
-python .\2.scr\3.curated\dim_contratos_gastos.py
-python .\2.scr\3.curated\facts_risco_renovacao.py
+python .\2.src\1.generator\company_generator.py
+python .\2.src\1.generator\risk_generator.py
+python .\2.src\1.generator\contract_generator.py
+python .\2.src\1.generator\spending_generator.py
+python .\2.src\2.etl\stg_empresas.py
+python .\2.src\2.etl\stg_contratos.py
+python .\2.src\2.etl\stg_aditamentos.py
+python .\2.src\2.etl\stg_pagamentos.py
+python .\2.src\2.etl\stg_homologacoes_risco.py
+python .\2.src\3.curated\dim_fornecedores.py
+python .\2.src\3.curated\dim_calendario_categoria.py
+python .\2.src\3.curated\dim_contratos_gastos.py
+python .\2.src\3.curated\facts_risco_renovacao.py
 ```
 
 Os geradores selecionam automaticamente a fonte versionada mais recente e preservam data e horário no nome dos arquivos. Execute-os na ordem acima para manter a coerência entre empresas, riscos, contratos, aditamentos e pagamentos.
@@ -81,7 +81,7 @@ O fluxo recomendado separa a geração RAW da execução ETL. Primeiro, crie o s
 inicial do cenário:
 
 ```powershell
-python .\2.scr\generate_raw.py `
+python .\2.src\generate_raw.py `
   --scenario-id cenario_001 `
   --qtd-empresas 500 `
   --seed 42 `
@@ -91,14 +91,14 @@ python .\2.scr\generate_raw.py `
 Em seguida, processe somente as fontes declaradas no manifesto criado:
 
 ```powershell
-python .\2.scr\run_etl.py `
+python .\2.src\run_etl.py `
   --raw-manifest .\1.data\1.raw\cenario_001\<snapshot_id>\raw_manifest.json
 ```
 
 Para evoluir esse cenário para uma nova data sem alterar o snapshot anterior:
 
 ```powershell
-python .\2.scr\update_raw.py `
+python .\2.src\update_raw.py `
   --from-manifest .\1.data\1.raw\cenario_001\<snapshot_id>\raw_manifest.json `
   --data-referencia 2026-09-30 `
   --seed 99 `
@@ -119,7 +119,7 @@ Para publicar as views SQL sobre uma execução curated aprovada, informe o mani
 ETL correspondente:
 
 ```powershell
-python .\2.scr\4.analytics\build_analytics.py `
+python .\2.src\4.analytics\build_analytics.py `
   --etl-manifest .\1.data\3.curated\<pipeline_run_id>\etl_manifest.json
 ```
 

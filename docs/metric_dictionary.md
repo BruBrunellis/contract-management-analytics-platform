@@ -1,6 +1,6 @@
 # Dicionário de métricas e KPIs
 
-As consultas em `2.scr/4.analytics/kpis/` são a implementação versionada dos
+As consultas em `2.src/4.analytics/kpis/` são a implementação versionada dos
 KPIs. Elas devem ser executadas no banco DuckDB construído a partir de um
 `etl_manifest.json` com quality gate aprovado.
 
