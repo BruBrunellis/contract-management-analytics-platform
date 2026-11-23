@@ -4,6 +4,9 @@ As consultas em `2.src/4.analytics/kpis/` são a implementação versionada dos
 KPIs. Elas devem ser executadas no banco DuckDB construído a partir de um
 `etl_manifest.json` com quality gate aprovado.
 
+O [inventário SQL/DAX e os casos de referência](metric_baseline.md) registram
+as medidas do PBIP, os filtros e os contratos para a consolidação das métricas.
+
 ## Convenções gerais
 
 - As métricas consomem somente views analíticas, que leem os Parquets curated
@@ -36,9 +39,9 @@ fluxos do ano.
 | Valor consumido do snapshot | `SUM(total_value - balance_value)`. | `vw_contracts`; preserva a regra de negócio consolidada no curated. |
 | Percentual de consumo | `valor consumido / valor contratado`. | Retorna nulo quando não houver valor contratado. |
 
-Consulta: `01_contract_balance_and_consumption.sql`. As medidas temporais do
-dashboard estão em `3.dashboard/measures/dashboard_measures.dax` e usam
-`validity_start_date` como data efetiva dos eventos de contrato e aditamento.
+Consulta: `01_contract_balance_and_consumption.sql`. As medidas temporais
+executadas pelo dashboard estão no TMDL do PBIP e usam `validity_start_date`
+como data efetiva dos eventos de contrato e aditamento.
 
 ## Vencimento e renovação
 
@@ -85,14 +88,18 @@ eventos de homologação e risco; ele não é uma tabela de respostas financeira
 | KPI | Fórmula e grão | Fonte e tratamento |
 |---|---|---|
 | Faturamento bruto anual | `gross_revenue` por fornecedor e ano fiscal. | `vw_supplier_financials`; receita zero produz razão de dependência nula. |
-| Valor anualizado de contratos ativos | Soma de `total_value / duração_em_dias × 365,25` dos contratos com status ativo, início até e término a partir da `as_of_date`. | `vw_contracts`; a população é a carteira sendo consumida na data do snapshot, não os contratos que apenas se sobrepõem a um ano fiscal. |
+| Valor anualizado de contratos ativos | Soma de `total_value / duração_em_dias × 365,25` dos contratos com status ativo, início até e término a partir da `as_of_date`. | `vw_contracts`. A duração inclui o primeiro e o último dia da vigência. |
 | Dependência financeira | `valor anualizado de contratos ativos / faturamento bruto mais recente` por fornecedor. | O faturamento mais recente é identificado por `financial_period_end_date`; denominador zero ou ausente retorna nulo. |
 | Dependência financeira ponderada por categoria | `SUM(dependência do fornecedor × valor anualizado do contrato) / SUM(valor anualizado do contrato)`. | Calculada no grão de contrato ativo; exclui contratos sem dependência válida e evita média simples de fornecedores. |
 | Valor contratado nos últimos 12 meses | Valor original de contratos e valor de aditamentos iniciados entre `EDATE(as_of_date, -12) + 1` e `as_of_date`. | `vw_contracts` e `vw_renewals`; usado como métrica de exposição recente, não como saldo. |
 | Cenários financeiros — fornecedores ativos | Contagem distinta de fornecedores por `financial_scenario`. | Inclui somente fornecedores com ao menos um contrato ativo na `as_of_date`. |
 | Cobertura de faturamento | `faturamento bruto mais recente / valor anualizado de contratos ativos`. | Retorna nulo sem contratos anualizados ou faturamento disponível. |
 
-Consulta: `05_supplier_financial_dependency.sql`.
+A consulta `05_supplier_financial_dependency.sql` publica a exposição
+anualizada e a razão por exercício. Ela usa os contratos que interceptam o
+período financeiro e a receita daquele exercício. As medidas da carteira ativa
+usam os contratos vigentes na `as_of_date` e a receita mais recente publicada
+para o mesmo CNPJ.
 
 No gráfico de saúde financeira, use `financial_year` no eixo, colunas lado a
 lado de faturamento bruto e custo total e uma linha em eixo secundário para a
