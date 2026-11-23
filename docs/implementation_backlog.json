@@ -1,0 +1,900 @@
+{
+  "repository": "BruBrunellis/contract-management-analytics-platform",
+  "stages": [
+    {
+      "key": 1,
+      "title": "Evolução 1 - Contratos e baseline",
+      "description": "Consolidar os contratos de métricas e de evolução dos dados antes de substituir o dashboard. Entregas: inventário SQL/DAX, métricas reconciliadas, regras de snapshots e onboarding atual corrigido. Base: architecture_review.md, etapa 1. Concluir quando casos conhecidos validarem carteira ativa, exposição anual, filtros e transições temporais.",
+      "number": 6,
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/milestone/6"
+    },
+    {
+      "key": 2,
+      "title": "Evolução 2 - Orquestração e publicação",
+      "description": "Entregar operação unificada: pacote Python, atualização de cenários, horizonte financeiro, catálogo e jobs, execução por dependências, publicação DuckDB consistente e menu mestre. Base: architecture_review.md, etapa 2. Concluir quando criar, atualizar e reprocessar chegarem ao DuckDB sem alterar históricos e falhas preservarem a publicação anterior.",
+      "number": 7,
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/milestone/7"
+    },
+    {
+      "key": 3,
+      "title": "Evolução 3 - API e portal inicial",
+      "description": "Entregar API Python e portal React/TypeScript com navegação, Visão de Categoria e Dados e execuções. Base: architecture_review.md, etapa 3. Concluir quando o usuário puder consultar e operar o pipeline pelo navegador local, com contexto de publicação e sem ODBC.",
+      "number": 8,
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/milestone/8"
+    },
+    {
+      "key": 4,
+      "title": "Evolução 4 - Domínios e validação",
+      "description": "Migrar Contratos, Spending, Fornecedores e Qualidade e validar o portal integrado. Base: architecture_review.md, etapa 4. Concluir com métricas reconciliadas por filtro, navegação acessível, qualidade das diferentes camadas e recuperação de falhas comprovadas.",
+      "number": 9,
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/milestone/9"
+    },
+    {
+      "key": 5,
+      "title": "Evolução 5 - Distribuição e demonstração",
+      "description": "Distribuir release local com frontend compilado, launcher, demonstração pública somente de consulta e documentação final, mantendo Power BI opcional. Base: architecture_review.md, etapa 5. Concluir com teste em ambiente limpo e experiência de consulta sem instalação.",
+      "number": 10,
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/milestone/10"
+    }
+  ],
+  "issues": [
+    {
+      "key": 1,
+      "stage": 1,
+      "title": "Inventariar métricas SQL/DAX e versionar o contrato da evolução",
+      "labels": [
+        "area:analytics",
+        "type:documentation",
+        "priority:p0"
+      ],
+      "deps": [],
+      "objective": "Estabelecer uma referência verificável para migrar o dashboard sem alterar silenciosamente os significados dos indicadores.",
+      "scope": [
+        "Versionar docs/architecture_review.md pela branch desta issue e registrar o mapa das cinco etapas e o fluxo issue → branch → avaliação → PR.",
+        "Inventariar as 65 declarações de medidas observadas nos TMDL, conferindo o estado vigente, medidas auxiliares, relacionamentos, filtros e consultas M.",
+        "Mapear métrica, grão, fonte, unidade, arredondamento, nulos, escopo de filtros e referência temporal.",
+        "Distinguir exposição anual de dependência da carteira ativa; registrar decisões e construir pequenos casos de referência calculados independentemente."
+      ],
+      "acceptance": [
+        "Cada medida vigente está mapeada para cálculo de negócio, apresentação ou descarte justificado.",
+        "Posição acumulada, fluxo anual, saldo de fechamento, janela móvel e data do snapshot têm contratos distintos.",
+        "Casos de referência possuem entradas e resultados esperados auditáveis, sem depender exclusivamente do DAX.",
+        "O documento de arquitetura e a ordem de implementação ficam versionados sem antecipar as demais implementações."
+      ],
+      "refs": [
+        "docs/architecture_review.md §§3,9",
+        "docs/metric_dictionary.md",
+        "3.dashboard/measures/dashboard_measures.dax",
+        "3.dashboard/contract_management_analytics.SemanticModel/definition"
+      ]
+    },
+    {
+      "key": 2,
+      "stage": 1,
+      "title": "Consolidar métricas SQL e reconciliar carteira ativa, períodos e filtros",
+      "labels": [
+        "area:analytics",
+        "type:feature",
+        "priority:p0"
+      ],
+      "deps": [
+        1
+      ],
+      "objective": "Disponibilizar cálculos analíticos coerentes para o portal e corrigir a divergência documentada entre SQL e DAX.",
+      "scope": [
+        "Implementar consultas ou macros SQL parametrizadas para as métricas de negócio aprovadas no inventário.",
+        "Preservar a exposição histórica anual com nome explícito e implementar dependência da carteira ativa na as_of_date e receita mais recente.",
+        "Cobrir posição acumulada, fluxos anuais, fechamento, janelas móveis, risco e ponderação por categoria com filtros no grão correto.",
+        "Versionar alterações de contratos públicos e documentar a compatibilidade do consumidor Power BI."
+      ],
+      "acceptance": [
+        "Contrato encerrado antes da as_of_date não entra na carteira ativa; sua participação anual segue definição própria.",
+        "Testes independentes cobrem bordas de período, nulos, zero denominador, matriz/filial e filtros de categoria.",
+        "Não há dupla contagem de aditamentos nem joins que multipliquem fatos.",
+        "SQL e dicionário concordam; diferenças diante do PBIP estão resolvidas ou justificadas explicitamente."
+      ],
+      "refs": [
+        "2.scr/4.analytics/sql/08_vw_supplier_financials.sql",
+        "2.scr/4.analytics/kpis",
+        "docs/metric_dictionary.md"
+      ]
+    },
+    {
+      "key": 3,
+      "stage": 1,
+      "title": "Definir contrato de atualização de cenários e corrigir o quickstart atual",
+      "labels": [
+        "area:pipeline",
+        "type:documentation",
+        "priority:p0"
+      ],
+      "deps": [],
+      "objective": "Tornar explícita a evolução dos snapshots e corrigir a experiência documentada antes de expor ações em menus.",
+      "scope": [
+        "Definir cenário, snapshot, execução e publicação; geração inicial, atualização de RAW, reprocessamento e atualização completa.",
+        "Especificar eventos entre datas, elegibilidade de fornecedores, fechamento de contratos, pagamento, reavaliação de risco e horizonte financeiro.",
+        "Distinguir quantidade de novas matrizes, geração de filiais e probabilidades aplicadas por entidade ou lote.",
+        "Corrigir os argumentos obrigatórios e a separação ETL/analytics nos READMEs; registrar que criar cenário preserva históricos."
+      ],
+      "acceptance": [
+        "Tabela de transições e exemplos para avanço de datas, vencimento e receita indisponível permitem implementar as regras sem ambiguidade.",
+        "Atualização é descrita como snapshot filho completo; não promete append físico ou ETL incremental.",
+        "Quickstart atual chega a analytics com argumentos válidos em ambiente limpo ou registra precisamente pré-requisitos não disponíveis.",
+        "Documentação não apresenta componentes futuros como implementados."
+      ],
+      "refs": [
+        "2.scr/update_raw.py",
+        "docs/raw_snapshots.md",
+        "README.md",
+        "3.dashboard/README.md"
+      ]
+    },
+    {
+      "key": 4,
+      "stage": 2,
+      "title": "Estruturar pacote Python e configuração reproduzível da plataforma",
+      "labels": [
+        "area:pipeline",
+        "type:chore",
+        "priority:p1"
+      ],
+      "deps": [
+        1,
+        3
+      ],
+      "objective": "Oferecer módulos importáveis e instalação reproduzível para terminal, API e executor compartilharem o mesmo código.",
+      "scope": [
+        "Criar src/contract_platform e metadados de pacote, movendo a estrutura gradualmente e preservando entradas legadas como adaptadores.",
+        "Separar dependências de execução e desenvolvimento, travar a resolução e declarar as versões Python suportadas.",
+        "Centralizar configuração de diretórios, timezone, presets, contratos e recursos SQL do pacote.",
+        "Reduzir sys.path.insert e duplicações de infraestrutura sem reescrever regras de domínio."
+      ],
+      "acceptance": [
+        "Instalação em ambiente limpo permite importar o pacote e localizar seus SQLs fora da raiz do checkout.",
+        "Fluxos legados continuam cobertos e produzem os mesmos resultados de negócio para o mesmo cenário.",
+        "CI Windows/Linux verifica as versões suportadas e a instalação documentada.",
+        "Configuração não depende de caminho pessoal ou diretório corrente."
+      ],
+      "refs": [
+        "pyproject.toml",
+        "requirements.txt",
+        "requirements-dev.txt",
+        "2.scr/run_pipeline.py",
+        "2.scr/run_etl.py"
+      ]
+    },
+    {
+      "key": 5,
+      "stage": 2,
+      "title": "Implementar atualização temporal consistente de fornecedores e contratos",
+      "labels": [
+        "area:pipeline",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        3,
+        4
+      ],
+      "objective": "Evoluir cenários existentes com eventos coerentes entre snapshots, preservando históricos e identificadores.",
+      "scope": [
+        "Aplicar o contrato de atualização a fornecedores novos e existentes elegíveis, contratos, aditamentos, homologações e pagamentos.",
+        "Simular eventos na janela entre as datas e tratar contratos que vencem dentro dela, saldos e risco de forma consistente.",
+        "Aplicar parâmetros com a granularidade documentada e produzir resumo de registros adicionados e alterados.",
+        "Usar estado aleatório por execução com seed efetiva persistida e IDs sem colisões."
+      ],
+      "acceptance": [
+        "Snapshot pai e arquivos antigos mantêm hashes; atualização só aceita data posterior.",
+        "Novos contratos não ficam limitados a fornecedores novos quando existentes forem elegíveis pelo contrato.",
+        "Testes de janela temporal, pagamentos, vencimentos, risco e referências demonstram integridade e reconciliação.",
+        "Repetir a mesma configuração, código e snapshot pai reproduz os mesmos dados de negócio."
+      ],
+      "refs": [
+        "2.scr/update_raw.py",
+        "2.scr/generate_raw.py",
+        "2.scr/raw_snapshot_framework.py",
+        "tests/test_raw_snapshots.py"
+      ]
+    },
+    {
+      "key": 6,
+      "stage": 2,
+      "title": "Parametrizar horizonte financeiro em geração, staging e curated",
+      "labels": [
+        "area:pipeline",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        3,
+        4
+      ],
+      "objective": "Permitir evoluir a simulação além de 2022–2026 sem publicar períodos financeiros ficticiamente atualizados.",
+      "scope": [
+        "Centralizar anos da simulação e data de disponibilidade de indicadores financeiros.",
+        "Remover dependência dispersa de ANO_REFERENCIA=2026 e range(2022,2027), evoluindo gerador, staging, curated e reconciliações em conjunto.",
+        "Versionar o schema e definir compatibilidade de snapshots antigos e períodos novos.",
+        "Manter explícita a diferença entre as_of_date e último período financeiro disponível."
+      ],
+      "acceptance": [
+        "Cenário de referência mantém resultados compatíveis; cenário que avança para novo exercício é coberto por teste.",
+        "Calendário e fato financeira cobrem o horizonte configurado sem hardcodes divergentes.",
+        "Receita futura ou ausente recebe o tratamento aprovado e não é fabricada por simples avanço da data.",
+        "Manifestos identificam horizonte e versão do contrato, e snapshots antigos têm caminho de leitura documentado."
+      ],
+      "refs": [
+        "2.scr/1.generator/company_generator.py",
+        "2.scr/1.generator/contract_generator.py",
+        "2.scr/2.etl/stg_empresas.py",
+        "2.scr/3.curated/fact_fornecedor_financeiro.py",
+        "2.scr/3.curated/reconciliacoes_curated.py"
+      ]
+    },
+    {
+      "key": 7,
+      "stage": 2,
+      "title": "Criar catálogo de cenários e jobs com exclusão mútua e recuperação",
+      "labels": [
+        "area:pipeline",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        4
+      ],
+      "objective": "Dar ao terminal e ao portal uma fonte persistente de seleção, progresso e diagnóstico de execuções.",
+      "scope": [
+        "Criar registro local, preferencialmente SQLite, para cenários, snapshots, jobs e publicações, separado do DuckDB analítico.",
+        "Registrar queued/running/succeeded/failed/interrupted, parâmetros, etapas, tempos, entradas, saídas e erros.",
+        "Coordenar um job de escrita por vez entre CLI, API e processos; usar executor separado para o trabalho pesado.",
+        "Implementar idempotência de submissão, detecção de interrupção e IDs únicos; importar manifestos existentes sem misturar cenários."
+      ],
+      "acceptance": [
+        "Submissão duplicada não cria duas execuções; reprocessamento intencional continua possível.",
+        "CLI e outro processo concorrente respeitam o mesmo lock e liberam recursos após falha.",
+        "Reinício identifica jobs interrompidos e mantém evidências suficientes para nova tentativa.",
+        "Catálogo resolve entradas por ID com validação de caminhos dentro da raiz configurada."
+      ],
+      "refs": [
+        "docs/architecture_review.md §7",
+        "2.scr/raw_snapshot_framework.py",
+        "2.scr/run_etl.py"
+      ]
+    },
+    {
+      "key": 8,
+      "stage": 2,
+      "title": "Refatorar pipeline em etapas com dependências e reuso rastreável",
+      "labels": [
+        "area:pipeline",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        4,
+        7
+      ],
+      "objective": "Permitir execução completa e parcial com entradas consistentes e resultados auditáveis.",
+      "scope": [
+        "Extrair a sequência atual para registro de etapas com entradas, saídas e dependências explícitas.",
+        "Planejar execução topológica e expor o plano antes de executá-lo, reaproveitando somente artefatos compatíveis.",
+        "Criar manifestos por etapa com snapshot, execução, configuração, versão de código e hashes.",
+        "Emitir eventos de progresso reais para o catálogo, preservando quality gates e exceções."
+      ],
+      "acceptance": [
+        "Reprocessamento completo não gera nem atualiza RAW.",
+        "Reconstruir analytics pode consumir curated aprovado; etapas parciais resolvem ou rejeitam pré-requisitos de forma clara.",
+        "Entradas de cenários, snapshots ou versões incompatíveis são rejeitadas.",
+        "Falha parcial não produz manifesto de sucesso completo e fica identificada no histórico."
+      ],
+      "refs": [
+        "2.scr/run_etl.py",
+        "2.scr/2.etl",
+        "2.scr/3.curated",
+        "docs/architecture_review.md §§5,7"
+      ]
+    },
+    {
+      "key": 9,
+      "stage": 2,
+      "title": "Publicar DuckDB versionado com promoção atômica e exportação portátil",
+      "labels": [
+        "area:analytics",
+        "type:feature",
+        "priority:p0"
+      ],
+      "deps": [
+        2,
+        7,
+        8
+      ],
+      "objective": "Preservar a última base aprovada durante atualizações e permitir distribuir uma base independente dos caminhos locais.",
+      "scope": [
+        "Construir em novo destino por publication_id e registrar manifesto analítico com linhagem, versões e hashes.",
+        "Validar qualidade, views, schemas e consultas antes de promover a publicação ativa em transação do catálogo.",
+        "Manter leitores na versão anterior até concluírem; abrir conexões analíticas somente para leitura.",
+        "Oferecer exportação que materialize as fontes internas no DuckDB e preserve as views públicas; documentar retenção conjunta no modo de Parquets externos."
+      ],
+      "acceptance": [
+        "Falha em construção ou validação não troca a publicação ativa nem modifica a anterior.",
+        "Leituras concorrentes não dependem de escritor no mesmo arquivo; publicação fica pinável por ID.",
+        "Cópia exportada continua consultando todas as views após mudança de diretório e indisponibilidade dos Parquets originais no teste.",
+        "Manifesto aprovado permite identificar exatamente o cenário, snapshot e execução publicados."
+      ],
+      "refs": [
+        "2.scr/4.analytics/build_analytics.py",
+        "2.scr/4.analytics/analytics_framework.py",
+        "tests/test_analytics_duckdb.py"
+      ]
+    },
+    {
+      "key": 10,
+      "stage": 2,
+      "title": "Entregar orquestrador mestre com menu e subcomandos de operação",
+      "labels": [
+        "area:pipeline",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "objective": "Permitir operar toda a plataforma por uma entrada principal, sem encadear scripts ou copiar caminhos de manifestos.",
+      "scope": [
+        "Criar fachada compartilhada de operações e CLI/menu: criar RAW, atualizar RAW, etapas específicas, processar existente, atualizar e processar, criar e preparar dashboard.",
+        "Selecionar cenário/snapshot por catálogo, exibindo data, seed, contagens e publicação aprovada.",
+        "Incluir integração analytics, progresso por etapa, histórico e diagnóstico de ambiente; fornecer comandos não interativos equivalentes.",
+        "Preservar cenários antigos e mostrar versões ainda não processadas; manter adaptadores legados enquanto necessários."
+      ],
+      "acceptance": [
+        "Todas as ações do menu têm semântica documentada e chamam a mesma fachada reutilizável pela API.",
+        "Fluxo inicial chega ao DuckDB; atualizar publica snapshot filho; processar existente preserva RAW.",
+        "Criação de cenário não apaga históricos e só ativa a publicação após sucesso.",
+        "Falhas apresentam etapa e evidência; nenhuma seleção combina arquivos mais recentes de cenários distintos."
+      ],
+      "refs": [
+        "2.scr/run_pipeline.py",
+        "2.scr/generate_raw.py",
+        "2.scr/update_raw.py",
+        "docs/architecture_review.md §5"
+      ]
+    },
+    {
+      "key": 11,
+      "stage": 3,
+      "title": "Implementar API Python para consulta analítica e controle de jobs",
+      "labels": [
+        "area:analytics",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        2,
+        7,
+        9,
+        10
+      ],
+      "objective": "Expor ao navegador os contratos de leitura e operação sem ODBC e sem duplicar o pipeline.",
+      "scope": [
+        "Implementar FastAPI para cenários, snapshots, publicações, jobs e consultas por domínio.",
+        "Submeter operações via POST /api/jobs com validação/idempotência e HTTP 202; consultar progresso sem bloquear requisições.",
+        "Fixar publication_id por conjunto de consultas e incluir publicação/filtros em cache; paginar resultados.",
+        "Definir dinheiro, datas, nulos e erros nos schemas; parametrizar SQL, restringir ordenação e caminhos; aplicar loopback e proteção de origem/token nas escritas locais."
+      ],
+      "acceptance": [
+        "API chama a mesma fachada da CLI e biblioteca DuckDB em modo de leitura.",
+        "Teste mantém todos os indicadores na mesma publicação durante uma promoção concorrente.",
+        "Pedidos duplicados, filtros inválidos, caminhos indevidos e escrita de origem não autorizada são tratados.",
+        "Contrato OpenAPI e testes de integração cobrem consulta, submissão, falha e progresso."
+      ],
+      "refs": [
+        "docs/architecture_review.md §§4,7",
+        "Camada analítica e serviço de operações entregues nas dependências"
+      ]
+    },
+    {
+      "key": 12,
+      "stage": 3,
+      "title": "Construir portal TypeScript com navegação e Visão de Categoria",
+      "labels": [
+        "area:dashboard",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        11
+      ],
+      "objective": "Entregar a primeira experiência analítica web com contexto consistente e navegação por domínio.",
+      "scope": [
+        "Criar React/TypeScript/Vite, estilos responsivos, rotas e navegação lateral para os domínios previstos.",
+        "Implementar Visão de Categoria com cards, comparações e gráficos do contrato aprovado.",
+        "Preservar filtros comuns em URL, limitar filtros específicos, exibir cenário/as_of_date/publicação e atualidade.",
+        "Validar biblioteca de gráficos quanto a interações, acessibilidade e tamanho; tratar loading, erro, vazio, nulos e unidades."
+      ],
+      "acceptance": [
+        "Página consome dados reais da API e reconcilia seus resultados sob filtros de referência.",
+        "Links preservam filtros e publicação; navegação funciona sem rolagem global entre todos os domínios.",
+        "Interface funciona em notebook e largura reduzida, com foco e navegação por teclado.",
+        "Frontend não recalcula regras financeiras de negócio nem exige ODBC."
+      ],
+      "refs": [
+        "docs/dashboard_specification.md",
+        "docs/architecture_review.md §6",
+        "3.dashboard/contract_management_analytics.Report"
+      ]
+    },
+    {
+      "key": 13,
+      "stage": 3,
+      "title": "Implementar menu de Dados e execuções no portal",
+      "labels": [
+        "area:dashboard",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        10,
+        11,
+        12
+      ],
+      "objective": "Permitir gerar, atualizar e processar dados pelo navegador com o mesmo contrato do terminal.",
+      "scope": [
+        "Criar seleção de cenários/snapshots, formulários de parâmetros e as seis ações de processamento definidas para a CLI.",
+        "Mostrar plano de etapas, publicação atual, RAW pendente, contagens, histórico e diagnósticos.",
+        "Acompanhar jobs por polling com progresso real e tratamento de submissão duplicada.",
+        "Manter dashboard consultável durante execução e mostrar falha sem descartar a publicação aprovada."
+      ],
+      "acceptance": [
+        "Usuário conclui primeiro cenário, atualização completa e reprocessamento pelo portal local.",
+        "CLI e portal submetem parâmetros equivalentes ao mesmo serviço; não há comandos de shell arbitrários.",
+        "Clique duplo, retorno à página e erro de rede não disparam execuções duplicadas.",
+        "Concluir atualização oferece a nova publicação de forma consistente; falha preserva dados anteriores."
+      ],
+      "refs": [
+        "docs/architecture_review.md §§5–7",
+        "API e CLI entregues nas dependências"
+      ]
+    },
+    {
+      "key": 14,
+      "stage": 4,
+      "title": "Migrar Contratos e Renovações para o portal",
+      "labels": [
+        "area:dashboard",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        2,
+        11,
+        12
+      ],
+      "objective": "Disponibilizar consumo, saldo, vencimento, risco e eventos contratuais com detalhe operacional.",
+      "scope": [
+        "Implementar página de Contratos, filtros de status/categoria/fornecedor e detalhe por contrato.",
+        "Exibir vencimentos, tracking de consumo, risco de aporte e eventos de renovação/aporte conforme contrato.",
+        "Usar tabela paginada/virtualizada, links para detalhe e contexto temporal explícito.",
+        "Preservar escopos dos filtros anuais, posição acumulada e janelas móveis onde aplicáveis."
+      ],
+      "acceptance": [
+        "Indicadores e recortes conciliam com os casos SQL aprovados.",
+        "Exibir eventos não duplica contrato nem seu valor total.",
+        "Datas-limite de vencimento, encerramento, ausência de eventos e nulos têm testes.",
+        "Filtros e detalhe permanecem navegáveis por teclado e URL."
+      ],
+      "refs": [
+        "docs/dashboard_specification.md",
+        "3.dashboard/contract_management_analytics.SemanticModel/definition/tables/analytics_run_context.tmdl"
+      ]
+    },
+    {
+      "key": 15,
+      "stage": 4,
+      "title": "Migrar Spending e concentração de gastos para o portal",
+      "labels": [
+        "area:dashboard",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        2,
+        11,
+        12
+      ],
+      "objective": "Entregar análise temporal de gastos, concentração por fornecedor e detalhe dos pagamentos.",
+      "scope": [
+        "Implementar série temporal, total filtrado, mix de categorias e ranking de concentração.",
+        "Adicionar filtros temporais, de categoria e fornecedor com semântica explícita.",
+        "Criar tabela de pagamentos paginada/virtualizada e acesso ao contrato relacionado.",
+        "Preservar grão do pagamento e regras de ranking, empates e ausência de denominador."
+      ],
+      "acceptance": [
+        "Total dos períodos e categorias reconcilia com spending no mesmo filtro.",
+        "Sem seleção de ano, histórico segue contrato; seleção anual filtra os visuais previstos.",
+        "Pagamentos aparecem uma única vez e referências inválidas são tratadas pela qualidade.",
+        "Filtros, vazios, nulos e navegação acessível são cobertos."
+      ],
+      "refs": [
+        "2.scr/4.analytics/kpis/03_spending_concentration.sql",
+        "docs/dashboard_specification.md"
+      ]
+    },
+    {
+      "key": 16,
+      "stage": 4,
+      "title": "Migrar Fornecedores, risco e dependência financeira para o portal",
+      "labels": [
+        "area:dashboard",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        2,
+        11,
+        12
+      ],
+      "objective": "Expor perfil do fornecedor, risco atual, carteira ativa e histórico financeiro com os grãos corretos.",
+      "scope": [
+        "Implementar pesquisa por CNPJ, fornecedor/grupo, perfil e carteira de contratos.",
+        "Exibir avaliação mais recente, dependência da carteira ativa e ponderação por categoria.",
+        "Implementar cenários financeiros e histórico de receita/custo/margem na população aprovada.",
+        "Distinguir dados de matriz/filial e períodos financeiros da as_of_date; preservar filtros globais e específicos."
+      ],
+      "acceptance": [
+        "Fornecedor ativo e dependência financeira conciliam com SQL consolidado, incluindo faturamento ausente ou zero.",
+        "Matriz e filiais não têm indicadores financeiros indevidamente somados.",
+        "Margem histórica é razão das somas e dependência de categoria segue a ponderação aprovada.",
+        "Empates de avaliações, fornecedores sem contratos e detalhes têm tratamento testado."
+      ],
+      "refs": [
+        "2.scr/4.analytics/sql/08_vw_supplier_financials.sql",
+        "docs/metric_dictionary.md",
+        "docs/dashboard_specification.md"
+      ]
+    },
+    {
+      "key": 17,
+      "stage": 4,
+      "title": "Consolidar qualidade RAW–STAGING–CURATED e criar página de investigação",
+      "labels": [
+        "area:quality",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        8,
+        9,
+        11,
+        12
+      ],
+      "objective": "Permitir investigar qualidade do pipeline inteiro, além das exceções curated hoje expostas.",
+      "scope": [
+        "Incorporar contagens e exceções staging aos contratos de qualidade, identificando camada, entidade, causa e linhagem.",
+        "Mostrar reconciliações, limiares, status do gate e exceções com filtros/paginação.",
+        "Permitir consultar evidências de jobs reprovados pelo catálogo sem promovê-los como publicação aprovada.",
+        "Distinguir controles RAW→staging e staging→curated e documentar denominadores de match rate."
+      ],
+      "acceptance": [
+        "Card e tabela de exceções conciliam por camada e entidade sem duplicação silenciosa.",
+        "Registros rejeitados em staging continuam visíveis e rastreáveis até a fonte.",
+        "Execução reprovada é investigável sem alterar o dashboard aprovado.",
+        "Testes cobrem qualidade aprovada, falha, ausência de exceções e contagens monetárias pertinentes."
+      ],
+      "refs": [
+        "2.scr/2.etl/staging_framework.py",
+        "2.scr/3.curated/reconciliacoes_curated.py",
+        "2.scr/4.analytics/sql/05_vw_quality_reconciliation.sql",
+        "2.scr/4.analytics/sql/06_vw_quality_exceptions.sql"
+      ]
+    },
+    {
+      "key": 18,
+      "stage": 4,
+      "title": "Validar portal integrado, equivalência de métricas e recuperação de falhas",
+      "labels": [
+        "area:quality",
+        "type:chore",
+        "priority:p1"
+      ],
+      "deps": [
+        13,
+        14,
+        15,
+        16,
+        17
+      ],
+      "objective": "Comprovar que a experiência integrada entrega números corretos e operação confiável antes da distribuição.",
+      "scope": [
+        "Executar matriz de equivalência entre casos independentes, SQL, API e visuais e registrar diferenças frente ao PBIP.",
+        "Automatizar jornadas críticas de primeiro uso, atualização, reprocessamento, filtros, detalhes e qualidade.",
+        "Cobrir clique duplicado, CLI/API concorrentes, falha intermediária/analytics e reinício do serviço.",
+        "Validar acessibilidade, responsividade e orçamento de consulta/renderização medido em cenário de referência."
+      ],
+      "acceptance": [
+        "Todos os domínios reconciliam por filtros e publicação sem dupla contagem ou mudança silenciosa de métrica.",
+        "Falhas e reinícios preservam publicação válida e deixam diagnóstico recuperável.",
+        "Jornadas críticas passam em CI e evidências visuais/documentais são versionadas.",
+        "Limites observados de desempenho e casos ainda não suportados estão explícitos."
+      ],
+      "refs": [
+        "docs/architecture_review.md §9",
+        "3.dashboard/validation/dashboard_validation.md",
+        "Testes dos componentes das etapas anteriores"
+      ]
+    },
+    {
+      "key": 19,
+      "stage": 5,
+      "title": "Empacotar portal local e launcher para instalação em ambiente limpo",
+      "labels": [
+        "area:pipeline",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        4,
+        10,
+        13,
+        18
+      ],
+      "objective": "Permitir que o usuário opere o portal local sem instalar Node, Power BI ou configurar ODBC.",
+      "scope": [
+        "Incluir frontend compilado e recursos SQL no pacote/release Python; automatizar build e validação em CI.",
+        "Criar launcher que verifica runtime, prepara ambiente/dependências travadas, inicia serviço e abre navegador.",
+        "Oferecer preset de demonstração reproduzível e explicitar o estado ainda sem dataset.",
+        "Garantir execução fora da raiz do checkout e instruções para Windows/Linux suportados."
+      ],
+      "acceptance": [
+        "Instalação limpa abre portal e completa cenário inicial até dashboard.",
+        "Usuário final não precisa de Node/Power BI/ODBC; Node fica restrito ao desenvolvimento/build.",
+        "Reabrir launcher não regenera dataset nem instala novamente dependências desnecessariamente.",
+        "Recursos do pacote, mensagens de erro e atualização de release têm testes e documentação."
+      ],
+      "refs": [
+        "docs/architecture_review.md §8",
+        "pyproject.toml",
+        ".github/workflows"
+      ]
+    },
+    {
+      "key": 20,
+      "stage": 5,
+      "title": "Preparar demonstração pública somente de consulta com cenário reproduzível",
+      "labels": [
+        "area:dashboard",
+        "type:feature",
+        "priority:p1"
+      ],
+      "deps": [
+        9,
+        18,
+        19
+      ],
+      "objective": "Permitir que visitantes do portfólio explorem o projeto diretamente pelo navegador.",
+      "scope": [
+        "Preparar cenário aprovado com seed, data, versão e artefatos identificados; escolher hospedagem compatível com consulta.",
+        "Disponibilizar build de demonstração sem operações públicas de geração/escrita e sem caminhos da máquina de origem.",
+        "Garantir rotas de detalhe, filtros e atualização versionada do snapshot demonstrativo.",
+        "Preparar configuração e documentação de deploy; publicação efetiva segue a avaliação e autorização de entrega combinadas."
+      ],
+      "acceptance": [
+        "Demonstração candidata abre sem instalação e consulta todos os domínios previstos.",
+        "Visitante não consegue executar geração, alterar o dataset compartilhado ou acessar endpoints de operação.",
+        "Artefatos são portáteis e sua atualização preserva contexto consistente.",
+        "Configuração de publicação está reproduzível; URL pública é verificada quando sua publicação for autorizada."
+      ],
+      "refs": [
+        "docs/architecture_review.md §8",
+        "Release local e publicação portátil entregues nas dependências"
+      ]
+    },
+    {
+      "key": 21,
+      "stage": 5,
+      "title": "Finalizar onboarding, documentação de operação e Power BI opcional",
+      "labels": [
+        "area:dashboard",
+        "type:documentation",
+        "priority:p1"
+      ],
+      "deps": [
+        18,
+        19,
+        20
+      ],
+      "objective": "Concluir a migração da experiência de uso com caminhos claros para visitante, operador e desenvolvedor.",
+      "scope": [
+        "Atualizar README com demonstração, instalação local, desenvolvimento e mapa de comandos/etapas.",
+        "Documentar jobs, snapshots, recuperação, publicação, portabilidade e manutenção de históricos.",
+        "Documentar Power BI como consumidor opcional, com conexão/refresh válidos e resultados de reconciliação.",
+        "Registrar arquitetura final, decisões de compatibilidade, limitações e evidências de aceitação; revisar links do backlog."
+      ],
+      "acceptance": [
+        "Cada público encontra uma trilha completa, testada e sem comandos obsoletos.",
+        "Demonstração somente de consulta e portal local operacional têm diferenças explícitas.",
+        "Documentação descreve a arquitetura realmente entregue e identifica eventuais itens adiados.",
+        "Fluxo por issue, branch dedicada, avaliação do usuário e PR sob solicitação permanece registrado."
+      ],
+      "refs": [
+        "README.md",
+        "3.dashboard/README.md",
+        "docs/architecture_review.md",
+        "docs/metric_dictionary.md"
+      ]
+    }
+  ],
+  "created": [
+    {
+      "key": 1,
+      "stage": 1,
+      "number": 55,
+      "title": "Inventariar métricas SQL/DAX e versionar o contrato da evolução",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/55",
+      "milestone": 6
+    },
+    {
+      "key": 2,
+      "stage": 1,
+      "number": 56,
+      "title": "Consolidar métricas SQL e reconciliar carteira ativa, períodos e filtros",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/56",
+      "milestone": 6
+    },
+    {
+      "key": 3,
+      "stage": 1,
+      "number": 57,
+      "title": "Definir contrato de atualização de cenários e corrigir o quickstart atual",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/57",
+      "milestone": 6
+    },
+    {
+      "key": 4,
+      "stage": 2,
+      "number": 58,
+      "title": "Estruturar pacote Python e configuração reproduzível da plataforma",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/58",
+      "milestone": 7
+    },
+    {
+      "key": 5,
+      "stage": 2,
+      "number": 59,
+      "title": "Implementar atualização temporal consistente de fornecedores e contratos",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/59",
+      "milestone": 7
+    },
+    {
+      "key": 6,
+      "stage": 2,
+      "number": 60,
+      "title": "Parametrizar horizonte financeiro em geração, staging e curated",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/60",
+      "milestone": 7
+    },
+    {
+      "key": 7,
+      "stage": 2,
+      "number": 61,
+      "title": "Criar catálogo de cenários e jobs com exclusão mútua e recuperação",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/61",
+      "milestone": 7
+    },
+    {
+      "key": 8,
+      "stage": 2,
+      "number": 62,
+      "title": "Refatorar pipeline em etapas com dependências e reuso rastreável",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/62",
+      "milestone": 7
+    },
+    {
+      "key": 9,
+      "stage": 2,
+      "number": 63,
+      "title": "Publicar DuckDB versionado com promoção atômica e exportação portátil",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/63",
+      "milestone": 7
+    },
+    {
+      "key": 10,
+      "stage": 2,
+      "number": 64,
+      "title": "Entregar orquestrador mestre com menu e subcomandos de operação",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/64",
+      "milestone": 7
+    },
+    {
+      "key": 11,
+      "stage": 3,
+      "number": 65,
+      "title": "Implementar API Python para consulta analítica e controle de jobs",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/65",
+      "milestone": 8
+    },
+    {
+      "key": 12,
+      "stage": 3,
+      "number": 66,
+      "title": "Construir portal TypeScript com navegação e Visão de Categoria",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/66",
+      "milestone": 8
+    },
+    {
+      "key": 13,
+      "stage": 3,
+      "number": 67,
+      "title": "Implementar menu de Dados e execuções no portal",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/67",
+      "milestone": 8
+    },
+    {
+      "key": 14,
+      "stage": 4,
+      "number": 68,
+      "title": "Migrar Contratos e Renovações para o portal",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/68",
+      "milestone": 9
+    },
+    {
+      "key": 15,
+      "stage": 4,
+      "number": 69,
+      "title": "Migrar Spending e concentração de gastos para o portal",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/69",
+      "milestone": 9
+    },
+    {
+      "key": 16,
+      "stage": 4,
+      "number": 70,
+      "title": "Migrar Fornecedores, risco e dependência financeira para o portal",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/70",
+      "milestone": 9
+    },
+    {
+      "key": 17,
+      "stage": 4,
+      "number": 71,
+      "title": "Consolidar qualidade RAW–STAGING–CURATED e criar página de investigação",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/71",
+      "milestone": 9
+    },
+    {
+      "key": 18,
+      "stage": 4,
+      "number": 72,
+      "title": "Validar portal integrado, equivalência de métricas e recuperação de falhas",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/72",
+      "milestone": 9
+    },
+    {
+      "key": 19,
+      "stage": 5,
+      "number": 73,
+      "title": "Empacotar portal local e launcher para instalação em ambiente limpo",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/73",
+      "milestone": 10
+    },
+    {
+      "key": 20,
+      "stage": 5,
+      "number": 74,
+      "title": "Preparar demonstração pública somente de consulta com cenário reproduzível",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/74",
+      "milestone": 10
+    },
+    {
+      "key": 21,
+      "stage": 5,
+      "number": 75,
+      "title": "Finalizar onboarding, documentação de operação e Power BI opcional",
+      "url": "https://github.com/BruBrunellis/contract-management-analytics-platform/issues/75",
+      "milestone": 10
+    }
+  ]
+}
