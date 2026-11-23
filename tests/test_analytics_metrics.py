@@ -183,7 +183,7 @@ def test_vencimento_tem_faixa_por_data_e_alerta_apenas_para_ativos(banco):
     ).fetchone() == (0, 1)
 
 
-def test_posicao_preserva_valor_moneterio_decimal(banco):
+def test_posicao_preserva_valor_monetario_decimal(banco):
     banco.execute(
         """
         INSERT INTO vw_contracts (contract_key, validity_start_date, original_value)
@@ -195,3 +195,214 @@ def test_posicao_preserva_valor_moneterio_decimal(banco):
     assert banco.execute(
         "SELECT balance_value FROM metric_contract_position(DATE '2026-01-01')"
     ).fetchone() == (Decimal("0.20"),)
+
+
+@pytest.fixture
+def banco_financeiro(banco):
+    banco.execute(
+        """
+        CREATE TABLE vw_suppliers (
+            supplier_key VARCHAR, supplier_cnpj VARCHAR, supplier_legal_name VARCHAR,
+            supplier_hierarchy VARCHAR, parent_supplier_key VARCHAR, economic_group_key VARCHAR,
+            financial_scenario VARCHAR
+        );
+        CREATE TABLE vw_rfi (
+            supplier_key VARCHAR, assessment_date DATE, risk_assessment_id VARCHAR,
+            homologation_status VARCHAR, final_risk VARCHAR
+        );
+        CREATE TABLE src_fact_supplier_financial (
+            financial_snapshot_key VARCHAR, supplier_key VARCHAR, financial_year INTEGER,
+            financial_period_calendar_key DATE, gross_revenue DECIMAL(18,2),
+            total_cost DECIMAL(18,2), net_income DECIMAL(18,2), economic_group_key VARCHAR,
+            payroll_cost DECIMAL(18,2), gross_profit DECIMAL(18,2), debt_interest DECIMAL(18,2)
+        );
+        CREATE VIEW src_dim_contract AS
+            SELECT *, validity_start_date AS validity_start_calendar_key,
+                   validity_end_date AS validity_end_calendar_key
+            FROM vw_contracts;
+        CREATE VIEW src_dim_calendar AS
+            SELECT calendar_date AS calendar_key, calendar_date FROM (
+                SELECT validity_start_date AS calendar_date FROM vw_contracts
+                UNION SELECT validity_end_date FROM vw_contracts
+                UNION SELECT financial_period_calendar_key FROM src_fact_supplier_financial
+            );
+        CREATE VIEW src_dim_supplier AS SELECT * FROM vw_suppliers;
+        CREATE VIEW src_dim_economic_group AS
+            SELECT DISTINCT economic_group_key, economic_group_key AS economic_group_legal_name
+            FROM vw_suppliers;
+        """
+    )
+    for arquivo in ("08_vw_supplier_financials.sql", "10_metric_financial_risk.sql"):
+        banco.execute((SQL_DIR / arquivo).read_text(encoding="utf-8"))
+    return banco
+
+
+def test_exposicao_anual_dependencia_ativa_e_contexto_financeiro(banco_financeiro):
+    banco = banco_financeiro
+    banco.execute(
+        """
+        INSERT INTO vw_suppliers VALUES
+            ('M', 'M-CNPJ', 'Matriz', 'Matriz', NULL, 'G', 'estavel'),
+            ('F', 'F-CNPJ', 'Filial', 'Filial', 'M', 'G', 'estavel'),
+            ('Z', 'Z-CNPJ', 'Zero', 'Matriz', NULL, 'Z', 'estavel'),
+            ('N', 'N-CNPJ', 'Sem receita', 'Matriz', NULL, 'N', 'estavel'),
+            ('P', 'P-CNPJ', 'Sem valor', 'Matriz', NULL, 'P', 'estavel');
+        INSERT INTO vw_contracts (contract_key, supplier_key, category_key, category_name,
+                                 contract_status, validity_start_date, validity_end_date, total_value)
+        VALUES ('M0', 'M', 'A', 'A', 'encerrado', '2026-01-01', '2026-03-31', 90),
+               ('M1', 'M', 'A', 'A', 'ativo', '2026-01-01', '2026-12-31', 365),
+               ('M2', 'M', 'B', 'B', 'ativo', '2026-01-01', '2026-12-31', 730),
+               ('F1', 'F', 'A', 'A', 'ativo', '2026-01-01', '2026-12-31', 365),
+               ('Z1', 'Z', 'A', 'A', 'ativo', '2026-01-01', '2026-12-31', 365),
+               ('N1', 'N', 'A', 'A', 'ativo', '2026-01-01', '2026-12-31', 365),
+               ('P1', 'P', 'A', 'A', 'ativo', '2026-01-01', '2026-12-31', 0);
+        INSERT INTO src_fact_supplier_financial (
+            financial_snapshot_key, supplier_key, financial_year, financial_period_calendar_key,
+            gross_revenue, total_cost, net_income, economic_group_key
+        )
+        VALUES ('M25', 'M', 2025, '2025-12-31', 5000, 4000, 500, 'G'),
+               ('M26', 'M', 2026, '2026-12-31', 3652.50, 2500, 365.25, 'G'),
+               ('F26', 'F', 2026, '2026-12-31', 1461, 1000, 292.20, 'G'),
+               ('Z25', 'Z', 2025, '2025-12-31', 1000, 800, 20, 'Z'),
+               ('Z26', 'Z', 2026, '2026-12-31', 0, 0, 0, 'Z'),
+               ('P26', 'P', 2026, '2026-12-31', 1000, 0, 0, 'P');
+        """
+    )
+    assert banco.execute(
+        "SELECT annual_exposure_value, annual_dependency_ratio "
+        "FROM metric_supplier_annual_exposure([2026], ['M'])"
+    ).fetchone() == pytest.approx((1461, 0.40))
+    assert banco.execute(
+        "SELECT annualized_contract_value, financial_dependency_ratio "
+        "FROM vw_supplier_financials WHERE supplier_key = 'M' AND financial_year = 2026"
+    ).fetchone() == pytest.approx((1461, 0.40))
+    rows = banco.execute(
+        "SELECT supplier_key, active_contract_count, active_annualized_value, "
+        "latest_revenue_period_end_date, active_dependency_ratio, active_revenue_coverage_ratio "
+        "FROM metric_supplier_active_dependency()"
+    ).fetchall()
+    data = {supplier: values for supplier, *values in rows}
+    assert data["M"] == [2, 1095.75, date(2026, 12, 31), 0.30, pytest.approx(10 / 3)]
+    assert data["F"] == [1, 365.25, date(2026, 12, 31), 0.25, 4]
+    assert data["Z"] == [1, 365.25, date(2026, 12, 31), None, 0]
+    assert data["N"] == [1, 365.25, None, None, None]
+    assert data["P"] == [1, 0, date(2026, 12, 31), 0, None]
+    category_rows = banco.execute(
+        "SELECT category_key, is_total, eligible_contract_count, weighted_dependency_ratio "
+        "FROM metric_category_active_dependency() ORDER BY is_total, category_key"
+    ).fetchall()
+    assert category_rows == [
+        ("A", False, 2, pytest.approx(0.275)),
+        ("B", False, 1, pytest.approx(0.30)),
+        (None, True, 3, pytest.approx(0.2875)),
+    ]
+    assert banco.execute(
+        "SELECT weighted_dependency_ratio "
+        "FROM metric_category_active_dependency(['M'], ['A']) WHERE is_total"
+    ).fetchone() == (pytest.approx(0.30),)
+    assert banco.execute(
+        "SELECT eligible_contract_count, weighted_dependency_ratio "
+        "FROM metric_category_active_dependency(['Z', 'N'], ['A']) WHERE is_total"
+    ).fetchone() == (0, None)
+    assert banco.execute(
+        "SELECT active_supplier_count FROM metric_supplier_financial_scenarios()"
+    ).fetchone() == (5,)
+    history = banco.execute(
+        "SELECT gross_revenue, total_cost, net_income, net_margin "
+        "FROM metric_supplier_financial_history([2026], NULL, ['A'])"
+    ).fetchone()
+    assert history[:3] == (Decimal("5113.50"), 3500, Decimal("657.45"))
+    assert history[3] == pytest.approx(657.45 / 5113.5)
+
+
+def test_carteira_ativa_aceita_um_dia_e_exclui_datas_invalidas(banco_financeiro):
+    banco = banco_financeiro
+    banco.execute(
+        """
+        INSERT INTO vw_suppliers (supplier_key) VALUES ('S');
+        INSERT INTO vw_contracts (contract_key, supplier_key, contract_status, validity_start_date,
+                                 validity_end_date, total_value)
+        VALUES ('hoje', 'S', 'ativo', '2026-07-31', '2026-07-31', 1),
+               ('invertido', 'S', 'ativo', '2026-07-31', '2026-07-01', 1),
+               ('sem_inicio', 'S', 'ativo', NULL, '2026-07-31', 1),
+               ('amanha', 'S', 'ativo', '2026-08-01', '2026-12-31', 1);
+        """
+    )
+    assert banco.execute(
+        "SELECT active_contract_count, active_annualized_value "
+        "FROM metric_supplier_active_dependency(['S'])"
+    ).fetchone() == (1, 365.25)
+
+
+def test_homologacao_desempata_por_id_e_exposicao_preserva_grao_de_evento(banco_financeiro):
+    banco = banco_financeiro
+    banco.execute(
+        """
+        INSERT INTO vw_rfi VALUES
+            ('M', '2026-07-10', 'AV-01', 'pendente', 'alto'),
+            ('M', '2026-07-10', 'AV-02', 'aprovado', 'baixo'),
+            ('F', '2026-07-01', 'AV-03', 'aprovado', 'baixo'),
+            ('F', '2026-07-10', 'AV-04', 'aprovado', 'alto');
+        INSERT INTO vw_contracts (contract_key, supplier_key, category_key, validity_start_date,
+                                 original_value)
+        VALUES ('C0', 'F', 'A', '2025-07-31', 900), ('C1', 'M', 'A', '2025-08-01', 100),
+               ('C2', 'F', 'A', '2026-07-31', 80), ('C3', 'N', 'A', '2026-07-31', 20);
+        INSERT INTO vw_renewals VALUES ('C2', '2026-07-31', 'aporte', 20);
+        """
+    )
+    assert banco.execute(
+        "SELECT risk_assessment_id, homologation_status, final_risk "
+        "FROM metric_supplier_latest_rfi(['M'])"
+    ).fetchone() == ("AV-02", "aprovado", "baixo")
+    assert banco.execute("SELECT * FROM metric_supplier_latest_rfi(['N'])").fetchone() is None
+    assert banco.execute(
+        "SELECT * FROM metric_high_risk_exposure(p_categories := ['A'])"
+    ).fetchone() == pytest.approx((220, 100, 100 / 220))
+
+
+def test_risco_de_aporte_conserva_limites_inclusivos_e_bases_ausentes(banco_financeiro):
+    banco = banco_financeiro
+    banco.execute(
+        """
+        INSERT INTO vw_contracts (
+            contract_key, contract_status, validity_start_date, validity_end_date,
+            total_value, balance_value
+        )
+        SELECT 'C' || id::VARCHAR, status, DATE '2026-07-31' - days_elapsed,
+               DATE '2026-07-31' + days_left, total, balance
+        FROM (VALUES (1, 'ativo', 50, 50, 1000, 300), (2, 'ativo', 50, 50, 1000, 450),
+                     (3, 'ativo', 50, 50, 1000, 451), (4, 'ativo', 50, 50, 0, 0),
+                     (5, 'ativo', 0, 0, 1000, 500), (6, 'ativo', 50, 50, 1000, NULL),
+                     (7, 'encerrado', 50, 50, 1000, 450))
+             AS examples(id, status, days_elapsed, days_left, total, balance);
+        """
+    )
+    assert banco.execute(
+        "SELECT contract_key, funding_risk FROM metric_contract_funding_risk() "
+        "ORDER BY contract_key"
+    ).fetchall() == [
+        ("C1", "Alto"), ("C2", "Médio"), ("C3", "Baixo"),
+        ("C4", None), ("C5", None), ("C6", None),
+    ]
+
+
+def test_risco_por_categoria_recalcula_o_total_e_desempata_extremos(banco_financeiro):
+    banco = banco_financeiro
+    banco.execute(
+        """
+        INSERT INTO vw_contracts (contract_key, category_key, category_name,
+                                 final_risk, balance_value)
+        VALUES ('C1', 'A', 'Zulu', 'alto', 100), ('C2', 'A', 'Zulu', NULL, 100),
+               ('C3', 'B', 'Alfa', 'medio', 300), ('C4', 'C', 'Beta', 'baixo', 100),
+               ('C5', 'D', 'Gama', NULL, 200), ('C6', 'E', 'Zero', 'alto', 0);
+        """
+    )
+    assert banco.execute(
+        "SELECT weighted_risk FROM metric_category_risk() WHERE is_total"
+    ).fetchone() == (pytest.approx(260 / 800),)
+    assert banco.execute(
+        "SELECT weighted_risk FROM metric_category_risk(p_categories := ['D']) WHERE NOT is_total"
+    ).fetchone() == (None,)
+    assert banco.execute("SELECT * FROM metric_category_risk_extremes()").fetchone() == (
+        0.5, "B", "Alfa", 0.1, "C", "Beta",
+    )

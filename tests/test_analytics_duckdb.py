@@ -75,6 +75,15 @@ def test_recria_views_duckdb_por_manifesto_etl(tmp_path):
         assert conexao.execute(
             "SELECT current_end FROM metric_contract_rolling()"
         ).fetchone() == (date(2026, 7, 30),)
+        assert conexao.execute(
+            "SELECT count(*) FROM metric_supplier_annual_exposure()"
+        ).fetchone() == conexao.execute("SELECT count(*) FROM vw_supplier_financials").fetchone()
+        assert conexao.execute(
+            "SELECT count(*) FROM metric_category_active_dependency() WHERE is_total"
+        ).fetchone() == (1,)
+        assert conexao.execute(
+            "SELECT count(*) FROM metric_supplier_latest_rfi()"
+        ).fetchone() == conexao.execute("SELECT count(DISTINCT supplier_key) FROM vw_rfi").fetchone()
 
 
 def test_rejeita_manifesto_com_quality_gate_reprovado(tmp_path):

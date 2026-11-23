@@ -6,6 +6,8 @@ KPIs. Elas devem ser executadas no banco DuckDB construído a partir de um
 
 O [inventário SQL/DAX e os casos de referência](metric_baseline.md) registram
 as medidas do PBIP, os filtros e os contratos para a consolidação das métricas.
+As [consultas v1](analytics_contracts.md#consultas-de-métricas-v1) implementam
+esses contratos com parâmetros de período, fornecedor e categoria.
 
 ## Convenções gerais
 
@@ -97,9 +99,10 @@ eventos de homologação e risco; ele não é uma tabela de respostas financeira
 
 A consulta `05_supplier_financial_dependency.sql` publica a exposição
 anualizada e a razão por exercício. Ela usa os contratos que interceptam o
-período financeiro e a receita daquele exercício. As medidas da carteira ativa
-usam os contratos vigentes na `as_of_date` e a receita mais recente publicada
-para o mesmo CNPJ.
+período financeiro e a receita daquele exercício. A mesma série é acessível
+com nomes explícitos em `metric_supplier_annual_exposure`. A consulta
+`metric_supplier_active_dependency` usa os contratos ativos e vigentes na
+`as_of_date` e a receita mais recente publicada para o mesmo CNPJ.
 
 No gráfico de saúde financeira, use `financial_year` no eixo, colunas lado a
 lado de faturamento bruto e custo total e uma linha em eixo secundário para a
