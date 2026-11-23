@@ -64,6 +64,17 @@ def test_recria_views_duckdb_por_manifesto_etl(tmp_path):
             assert {"category_macro_group", "category_group", "category_family"}.issubset(colunas_categoria)
         for arquivo_sql in sorted((SCRIPT_DIR / "4.analytics" / "kpis").glob("*.sql")):
             assert conexao.execute(arquivo_sql.read_text(encoding="utf-8")).fetchall() is not None
+        assert conexao.execute(
+            "SELECT count(*) FROM metric_contract_expiry()"
+        ).fetchone() == conexao.execute("SELECT count(*) FROM vw_contracts").fetchone()
+        assert conexao.execute(
+            "SELECT sum(payment_count) FROM metric_spending()"
+        ).fetchone() == conexao.execute(
+            "SELECT count(*) FROM vw_spending WHERE payment_date IS NOT NULL"
+        ).fetchone()
+        assert conexao.execute(
+            "SELECT current_end FROM metric_contract_rolling()"
+        ).fetchone() == (date(2026, 7, 30),)
 
 
 def test_rejeita_manifesto_com_quality_gate_reprovado(tmp_path):
